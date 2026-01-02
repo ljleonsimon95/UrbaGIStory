@@ -8,6 +8,7 @@ using Microsoft.OpenApi;
 using UrbaGIStory.Server.Data;
 using UrbaGIStory.Server.Identity;
 using UrbaGIStory.Server.Middleware;
+using UrbaGIStory.Server.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -198,6 +199,9 @@ builder.Services.AddCors(options =>
               .AllowCredentials();
     });
 });
+
+// Register application services
+builder.Services.AddScoped<BackupService>();
 
 var app = builder.Build();
 

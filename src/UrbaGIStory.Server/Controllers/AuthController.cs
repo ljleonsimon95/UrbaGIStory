@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -111,5 +112,38 @@ public class AuthController : ControllerBase
         });
     }
 
+    /// <summary>
+    /// Gets the current authenticated user information.
+    /// </summary>
+    /// <returns>Current user information</returns>
+    [HttpGet("me")]
+    [Authorize]
+    [ProducesResponseType(typeof(UserInfo), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> GetCurrentUser()
+    {
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst(JwtRegisteredClaimNames.Sub);
+        if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
+        {
+            return Unauthorized(new { message = "Invalid token" });
+        }
+
+        var user = await _userManager.FindByIdAsync(userId.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("User not found for ID: {UserId}", userId);
+            return Unauthorized(new { message = "User not found" });
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return Ok(new UserInfo
+        {
+            Id = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Roles = roles.ToList()
+        });
+    }
 }
 

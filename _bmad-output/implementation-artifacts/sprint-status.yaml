@@ -53,14 +53,14 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: User Authentication & Authorization
-  epic-2: backlog
-  2-1-implementar-registro-e-inicio-de-sesion-de-usuarios: backlog
-  2-2-implementar-gestion-de-usuarios-por-administrador-tecnico: backlog
-  2-3-implementar-asignacion-de-roles-a-usuarios: backlog
-  2-4-implementar-gestion-de-permisos-dinamicos-por-jefe-de-oficina: backlog
-  2-5-implementar-desactivacion-de-usuarios-soft-delete: backlog
-  2-6-implementar-control-de-acceso-basado-en-roles-rbac: backlog
-  2-7-implementar-soporte-para-acceso-concurrente-de-multiples-usuarios: backlog
+  epic-2: done
+  2-1-implementar-registro-e-inicio-de-sesion-de-usuarios: done
+  2-2-implementar-gestion-de-usuarios-por-administrador-tecnico: done
+  2-3-implementar-asignacion-de-roles-a-usuarios: done
+  2-4-implementar-gestion-de-permisos-dinamicos-por-jefe-de-oficina: done
+  2-5-implementar-desactivacion-de-usuarios-soft-delete: done
+  2-6-implementar-control-de-acceso-basado-en-roles-rbac: done
+  2-7-implementar-soporte-para-acceso-concurrente-de-multiples-usuarios: done
   epic-2-retrospective: optional
 
   # Epic 3: Geographic Visualization

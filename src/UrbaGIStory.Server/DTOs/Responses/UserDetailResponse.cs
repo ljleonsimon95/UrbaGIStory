@@ -34,5 +34,11 @@ public class UserDetailResponse
     /// Date and time when the user was created (UTC).
     /// </summary>
     public DateTime CreatedAt { get; set; }
+
+    /// <summary>
+    /// Row version for optimistic concurrency control.
+    /// Include this value in update requests to detect concurrent modifications.
+    /// </summary>
+    public byte[]? RowVersion { get; set; }
 }
 

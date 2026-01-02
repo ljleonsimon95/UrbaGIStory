@@ -1,8 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using UrbaGIStory.Server.Data;
 using UrbaGIStory.Server.DTOs.Requests;
 using UrbaGIStory.Server.DTOs.Responses;
+using UrbaGIStory.Server.Exceptions;
 using UrbaGIStory.Server.Identity;
 
 namespace UrbaGIStory.Server.Controllers;
@@ -18,15 +21,18 @@ public class UsersController : ControllerBase
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly AppDbContext _dbContext;
     private readonly ILogger<UsersController> _logger;
 
     public UsersController(
         UserManager<ApplicationUser> userManager,
         RoleManager<ApplicationRole> roleManager,
+        AppDbContext dbContext,
         ILogger<UsersController> logger)
     {
         _userManager = userManager;
         _roleManager = roleManager;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -94,14 +100,17 @@ public class UsersController : ControllerBase
 
         _logger.LogInformation("User {Username} created successfully by administrator", user.UserName);
 
+        // Reload from DbContext to get RowVersion
+        var userWithVersion = await _dbContext.Users.FindAsync(user.Id);
         var response = new UserDetailResponse
         {
             Id = user.Id,
             Username = user.UserName ?? string.Empty,
             Email = user.Email ?? string.Empty,
             Roles = (await _userManager.GetRolesAsync(user)).ToList(),
-            IsActive = !user.LockoutEnabled || user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
-            CreatedAt = DateTime.UtcNow
+            IsActive = user.IsActive,
+            CreatedAt = DateTime.UtcNow,
+            RowVersion = userWithVersion?.RowVersion
         };
 
         return CreatedAtAction(nameof(GetUser), new { id = user.Id }, response);
@@ -125,11 +134,21 @@ public class UsersController : ControllerBase
             return BadRequest(ModelState);
         }
 
-        var user = await _userManager.FindByIdAsync(id.ToString());
+        // Load user from DbContext to track RowVersion for concurrency control
+        var user = await _dbContext.Users.FindAsync(id);
         if (user == null)
         {
             _logger.LogWarning("Attempt to update non-existent user: {UserId}", id);
             return NotFound(new { message = "User not found" });
+        }
+
+        // Check for concurrency conflict if RowVersion is provided
+        if (request.RowVersion != null && !user.RowVersion.SequenceEqual(request.RowVersion))
+        {
+            _logger.LogWarning(
+                "Concurrency conflict detected for user {UserId}. Expected RowVersion: {Expected}, Actual: {Actual}",
+                id, Convert.ToBase64String(request.RowVersion), Convert.ToBase64String(user.RowVersion));
+            throw new ConcurrencyConflictException("ApplicationUser", id);
         }
 
         // Update username if provided
@@ -184,27 +203,36 @@ public class UsersController : ControllerBase
             }
         }
 
-        // Save changes
-        var updateResult = await _userManager.UpdateAsync(user);
-        if (!updateResult.Succeeded)
+        // Save changes using DbContext to leverage RowVersion concurrency control
+        try
         {
-            foreach (var error in updateResult.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-            return BadRequest(ModelState);
+            await _dbContext.SaveChangesAsync();
         }
+        catch (DbUpdateConcurrencyException)
+        {
+            // Reload user to get current RowVersion
+            await _dbContext.Entry(user).ReloadAsync();
+            _logger.LogWarning(
+                "Concurrency conflict detected for user {UserId} during save. Current RowVersion: {RowVersion}",
+                id, Convert.ToBase64String(user.RowVersion));
+            throw new ConcurrencyConflictException("ApplicationUser", id);
+        }
+
+        // Reload user to get updated RowVersion
+        await _dbContext.Entry(user).ReloadAsync();
 
         _logger.LogInformation("User {Username} updated successfully by administrator", user.UserName);
 
+        var roles = await _userManager.GetRolesAsync(user);
         var response = new UserDetailResponse
         {
             Id = user.Id,
             Username = user.UserName ?? string.Empty,
             Email = user.Email ?? string.Empty,
-            Roles = (await _userManager.GetRolesAsync(user)).ToList(),
-            IsActive = !user.LockoutEnabled || user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
-            CreatedAt = user.Id.ToString().Length > 0 ? DateTime.UtcNow : DateTime.UtcNow // Placeholder, would need to track creation date
+            Roles = roles.ToList(),
+            IsActive = user.IsActive,
+            CreatedAt = DateTime.UtcNow, // Placeholder, would need to track creation date
+            RowVersion = user.RowVersion
         };
 
         return Ok(response);
@@ -261,9 +289,16 @@ public class UsersController : ControllerBase
 
         // Build response
         var userDetails = new List<UserDetailResponse>();
+        // Load users from DbContext to get RowVersion
+        var userIds = users.Select(u => u.Id).ToList();
+        var usersWithVersion = await _dbContext.Users
+            .Where(u => userIds.Contains(u.Id))
+            .ToDictionaryAsync(u => u.Id);
+
         foreach (var user in users)
         {
             var roles = await _userManager.GetRolesAsync(user);
+            usersWithVersion.TryGetValue(user.Id, out var userWithVersion);
             userDetails.Add(new UserDetailResponse
             {
                 Id = user.Id,
@@ -271,7 +306,8 @@ public class UsersController : ControllerBase
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToList(),
                 IsActive = user.IsActive,
-                CreatedAt = DateTime.UtcNow // Placeholder, would need to track creation date
+                CreatedAt = DateTime.UtcNow, // Placeholder, would need to track creation date
+                RowVersion = userWithVersion?.RowVersion
             });
         }
 
@@ -303,14 +339,17 @@ public class UsersController : ControllerBase
 
         var roles = await _userManager.GetRolesAsync(user);
 
+        // Reload from DbContext to get RowVersion
+        var userWithVersion = await _dbContext.Users.FindAsync(user.Id);
         var response = new UserDetailResponse
         {
             Id = user.Id,
             Username = user.UserName ?? string.Empty,
             Email = user.Email ?? string.Empty,
             Roles = roles.ToList(),
-            IsActive = !user.LockoutEnabled || user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
-            CreatedAt = DateTime.UtcNow // Placeholder, would need to track creation date
+            IsActive = user.IsActive,
+            CreatedAt = DateTime.UtcNow, // Placeholder, would need to track creation date
+            RowVersion = userWithVersion?.RowVersion
         };
 
         return Ok(response);

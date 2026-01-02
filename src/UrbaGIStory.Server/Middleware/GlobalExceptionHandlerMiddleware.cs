@@ -111,6 +111,30 @@ public class GlobalExceptionHandlerMiddleware
                 problemDetails.Detail = argEx.Message;
                 break;
 
+            case ConcurrencyConflictException concurrencyEx:
+                problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8";
+                problemDetails.Title = "Concurrency Conflict";
+                problemDetails.Status = (int)HttpStatusCode.Conflict;
+                problemDetails.Detail = concurrencyEx.Message;
+                
+                // Add entity information to extensions
+                if (!string.IsNullOrEmpty(concurrencyEx.EntityType))
+                {
+                    problemDetails.Extensions["entityType"] = concurrencyEx.EntityType;
+                }
+                if (concurrencyEx.Id != null)
+                {
+                    problemDetails.Extensions["entityId"] = concurrencyEx.Id;
+                }
+                break;
+
+            case DbUpdateConcurrencyException concurrencyDbEx:
+                problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.5.8";
+                problemDetails.Title = "Concurrency Conflict";
+                problemDetails.Status = (int)HttpStatusCode.Conflict;
+                problemDetails.Detail = "The entity has been modified by another user. Please refresh and try again.";
+                break;
+
             case DbUpdateException dbEx:
                 problemDetails.Type = "https://tools.ietf.org/html/rfc7231#section-6.6.1";
                 problemDetails.Title = "Database Error";

@@ -30,5 +30,12 @@ public class UpdateUserRequest
     /// Current password (required when changing password).
     /// </summary>
     public string? CurrentPassword { get; set; }
+
+    /// <summary>
+    /// Row version for optimistic concurrency control.
+    /// This should be the RowVersion value from the last read of the user.
+    /// If provided, the update will fail if the user has been modified by another user.
+    /// </summary>
+    public byte[]? RowVersion { get; set; }
 }
 

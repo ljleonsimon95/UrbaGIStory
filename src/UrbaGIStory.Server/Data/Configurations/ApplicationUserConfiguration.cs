@@ -26,6 +26,12 @@ public class ApplicationUserConfiguration : IEntityTypeConfiguration<Application
         builder.Property(u => u.DeactivatedBy)
             .IsRequired(false)
             .HasComment("ID of the administrator who deactivated the user (null if active).");
+
+        // Configure RowVersion for optimistic concurrency control
+        builder.Property(u => u.RowVersion)
+            .IsRowVersion()
+            .IsRequired()
+            .HasComment("Row version used for optimistic concurrency control. Automatically updated by the database on each update.");
     }
 }
 

@@ -201,3 +201,9 @@ appsettings.*.json.local
 # Exclude output documentation (keep it in source control)
 !_bmad-output/
 
+# Keep Postman collections and environment in source control
+!postman/
+!postman/**/*.postman_collection.json
+!postman/**/*.postman_environment.json
+!postman/**/*.md
+

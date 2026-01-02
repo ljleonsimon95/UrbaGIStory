@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
 using UrbaGIStory.Server.Data;
 using UrbaGIStory.Server.Identity;
 using UrbaGIStory.Server.Middleware;
@@ -17,6 +18,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
+    // API Information
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "UrbaGIStory API",
+        Version = "v1",
+        Description = "API for UrbaGIStory - Urban Geographic Information System"
+    });
+
     // Include XML comments
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
@@ -25,8 +34,24 @@ builder.Services.AddSwaggerGen(options =>
         options.IncludeXmlComments(xmlPath);
     }
 
-    // Note: JWT Bearer authentication configuration will be added in Story 2.1
-    // when AuthController is implemented. For now, Swagger works with XML comments.
+    // JWT Bearer authentication configuration for Swagger
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Description = "JWT Authorization header using the Bearer scheme. Enter 'Bearer' [space] and then your token.",
+        In = ParameterLocation.Header,
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT"
+    });
+
+    options.AddSecurityRequirement(doc => new Microsoft.OpenApi.OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecuritySchemeReference("Bearer"),
+            new List<string>()
+        }
+    });
 });
 
 // Configure EF Core with PostgreSQL and PostGIS

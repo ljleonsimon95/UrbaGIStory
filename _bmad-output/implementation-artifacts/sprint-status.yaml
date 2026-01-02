@@ -47,7 +47,7 @@ development_status:
   1-3-configurar-autenticacion-y-autorizacion-base: backlog
   1-4-implementar-manejo-de-errores-global: backlog
   1-5-configurar-documentacion-api-swagger: backlog
-  1-6-implementar-endpoints-de-administracion-del-sistema: backlog
+  1-6-implementar-endpoints-de-administracion-del-sistema: done
   1-7-implementar-funcionalidad-de-backup-restore: backlog
   1-8-implementar-logging-y-monitoreo: backlog
   epic-1-retrospective: optional

@@ -182,8 +182,8 @@ appsettings.*.json.local
 *.vbproj
 *.fsproj
 
-# Keep source files
-*.cs
+# Keep source files (explicitly allow .cs files in src/ directories)
+!src/**/*.cs
 *.razor
 *.css
 *.html

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using UrbaGIStory.Server.Data;
+using UrbaGIStory.Server.Exceptions;
 
 namespace UrbaGIStory.Server.Controllers;
 
@@ -70,6 +71,28 @@ public class HealthController : ControllerBase
                 postgisEnabled = false
             });
         }
+    }
+
+    /// <summary>
+    /// Test endpoint for error handling - throws different exception types.
+    /// Only available in Development environment.
+    /// </summary>
+    [HttpGet("test-error/{type}")]
+    public IActionResult TestError(string type)
+    {
+        return type.ToLower() switch
+        {
+            "notfound" => throw new EntityNotFoundException("TestEntity", 123),
+            "validation" => throw new ValidationException("Test validation error", new Dictionary<string, string[]>
+            {
+                { "field1", new[] { "Field1 is required" } },
+                { "field2", new[] { "Field2 must be greater than 0" } }
+            }),
+            "argument" => throw new ArgumentException("Invalid argument provided"),
+            "unauthorized" => throw new UnauthorizedAccessException("You are not authorized"),
+            "generic" => throw new Exception("Generic exception for testing"),
+            _ => BadRequest("Unknown error type. Use: notfound, validation, argument, unauthorized, generic")
+        };
     }
 }
 

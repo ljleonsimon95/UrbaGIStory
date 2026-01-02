@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("UrbaGIStory.Server")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+0bcfb0e896ede973575883cf1a8084928d84a159")]
 [assembly: System.Reflection.AssemblyProductAttribute("UrbaGIStory.Server")]
 [assembly: System.Reflection.AssemblyTitleAttribute("UrbaGIStory.Server")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

@@ -43,7 +43,7 @@ development_status:
   # Epic 1: Project Foundation & System Setup
   epic-1: in-progress
   1-1-inicializar-proyecto-y-estructura-base: done
-  1-2-configurar-base-de-datos-y-postgis: backlog
+  1-2-configurar-base-de-datos-y-postgis: done
   1-3-configurar-autenticacion-y-autorizacion-base: backlog
   1-4-implementar-manejo-de-errores-global: backlog
   1-5-configurar-documentacion-api-swagger: backlog

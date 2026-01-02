@@ -9,3 +9,4 @@ C:\Users\AllTech\Projects\BMAD\src\UrbaGIStory.Shared\obj\Debug\net10.0\UrbaGISt
 C:\Users\AllTech\Projects\BMAD\src\UrbaGIStory.Shared\obj\Debug\net10.0\refint\UrbaGIStory.Shared.dll
 C:\Users\AllTech\Projects\BMAD\src\UrbaGIStory.Shared\obj\Debug\net10.0\UrbaGIStory.Shared.pdb
 C:\Users\AllTech\Projects\BMAD\src\UrbaGIStory.Shared\obj\Debug\net10.0\ref\UrbaGIStory.Shared.dll
+C:\Users\AllTech\Projects\BMAD\src\UrbaGIStory.Shared\obj\Debug\net10.0\UrbaGIStory.Shared.sourcelink.json

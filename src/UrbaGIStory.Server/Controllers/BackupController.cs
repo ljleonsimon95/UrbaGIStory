@@ -78,7 +78,7 @@ public class BackupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> RestoreBackup([FromBody] RestoreRequest request = null)
+    public async Task<IActionResult> RestoreBackup([FromBody] RestoreRequest? request = null)
     {
         if (!ModelState.IsValid)
         {

@@ -5,12 +5,36 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Serilog;
+using Serilog.Events;
 using UrbaGIStory.Server.Data;
 using UrbaGIStory.Server.Identity;
 using UrbaGIStory.Server.Middleware;
 using UrbaGIStory.Server.Services;
 
+// Configure Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
+    .MinimumLevel.Override("Microsoft.AspNetCore", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithThreadId()
+    .Enrich.WithEnvironmentName()
+    .WriteTo.Console()
+    .WriteTo.File(
+        path: "logs/urbagistory-.log",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 30,
+        fileSizeLimitBytes: 10 * 1024 * 1024, // 10 MB
+        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{ThreadId}] {Message:lj}{NewLine}{Exception}")
+    .CreateLogger();
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Use Serilog for logging
+builder.Host.UseSerilog();
 
 var configuration = builder.Configuration;
 
@@ -69,10 +93,15 @@ builder.Services.AddSwaggerGen(options =>
 
 // Configure EF Core with PostgreSQL and PostGIS
 builder.Services.AddDbContext<AppDbContext>(options =>
+{
     options.UseNpgsql(
         configuration.GetConnectionString("DefaultConnection"),
         npgsqlOptions => npgsqlOptions.UseNetTopologySuite()
-    ));
+    );
+    
+    // Enable query logging for performance monitoring (only in development)
+    // Note: Detailed query logging is handled by Serilog configuration
+});
 
 // Configure ASP.NET Core Identity
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
@@ -202,6 +231,8 @@ builder.Services.AddCors(options =>
 
 // Register application services
 builder.Services.AddScoped<BackupService>();
+builder.Services.AddScoped<LogsService>();
+builder.Services.AddSingleton<PerformanceMetricsService>();
 
 var app = builder.Build();
 
@@ -224,6 +255,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// Request logging middleware - must be early in pipeline
+app.UseMiddleware<RequestLoggingMiddleware>();
+
 // Global exception handler middleware - must be early in pipeline
 app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
@@ -237,4 +271,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.Run();
+try
+{
+    Log.Information("Starting UrbaGIStory API");
+    app.Run();
+}
+catch (Exception ex)
+{
+    Log.Fatal(ex, "Application terminated unexpectedly");
+    throw;
+}
+finally
+{
+    Log.CloseAndFlush();
+}

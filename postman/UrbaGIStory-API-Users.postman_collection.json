@@ -266,6 +266,257 @@
 				"description": "Updates an existing user's information. To change password, include both 'password' and 'currentPassword' fields. Requires TechnicalAdministrator role."
 			},
 			"response": []
+		},
+		{
+			"name": "Get User Roles",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has roles information\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('userId');",
+							"    pm.expect(jsonData).to.have.property('username');",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Gets the roles assigned to a specific user. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Role to User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"    pm.expect(jsonData.roles).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roleName\": \"Specialist\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Adds a role to a user. Users can have multiple roles. If the user already has this role, no action is taken. Valid roles: TechnicalAdministrator, OfficeManager, Specialist. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Change User Role",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roleName\": \"OfficeManager\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Replaces all user roles with a single new role. Removes ALL existing roles and assigns the new one. Valid roles: TechnicalAdministrator, OfficeManager, Specialist. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Role from User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles/:roleName",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles",
+						":roleName"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						},
+						{
+							"key": "roleName",
+							"value": "Specialist",
+							"description": "Role name to remove (TechnicalAdministrator, OfficeManager, or Specialist)"
+						}
+					]
+				},
+				"description": "Removes a specific role from a user. If the user doesn't have this role, no action is taken. Requires TechnicalAdministrator role."
+			},
+			"response": []
 		}
 	],
 	"event": [

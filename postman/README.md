@@ -44,12 +44,16 @@ Este directorio contiene todas las colecciones de Postman para la API de UrbaGIS
 - **Características:** Requiere rol `TechnicalAdministrator`
 
 ### 6. **UrbaGIStory-API-Users.postman_collection.json**
-- **Propósito:** Gestión de usuarios
+- **Propósito:** Gestión de usuarios y roles
 - **Endpoints:**
   - `POST /api/Users` - Crear nuevo usuario
   - `GET /api/Users` - Listar usuarios con filtros y paginación
   - `GET /api/Users/{id}` - Obtener usuario por ID
   - `PUT /api/Users/{id}` - Actualizar usuario
+  - `GET /api/Users/{id}/roles` - Obtener roles del usuario
+  - `POST /api/Users/{id}/roles` - Agregar rol a usuario (permite múltiples roles)
+  - `PUT /api/Users/{id}/roles` - Reemplazar todos los roles con uno nuevo
+  - `DELETE /api/Users/{id}/roles/{roleName}` - Eliminar un rol específico del usuario
 - **Características:** Requiere rol `TechnicalAdministrator`
 
 ## Environment

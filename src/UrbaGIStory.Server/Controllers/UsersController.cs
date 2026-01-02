@@ -322,5 +322,244 @@ public class UsersController : ControllerBase
 
         return Ok(response);
     }
+
+    /// <summary>
+    /// Gets the roles assigned to a specific user.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <returns>User roles information</returns>
+    [HttpGet("{id}/roles")]
+    [ProducesResponseType(typeof(UserRolesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> GetUserRoles(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            return NotFound(new { message = "User not found" });
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return Ok(new UserRolesResponse
+        {
+            UserId = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Roles = roles.ToList()
+        });
+    }
+
+    /// <summary>
+    /// Adds a role to a user. If the user already has this role, no action is taken.
+    /// Users can have multiple roles.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <param name="request">Role assignment data</param>
+    /// <returns>Updated user roles information</returns>
+    [HttpPost("{id}/roles")]
+    [ProducesResponseType(typeof(UserRolesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> AssignRole(Guid id, [FromBody] AssignRoleRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("Attempt to assign role to non-existent user: {UserId}", id);
+            return NotFound(new { message = "User not found" });
+        }
+
+        // Validate role exists
+        if (!await _roleManager.RoleExistsAsync(request.RoleName))
+        {
+            _logger.LogWarning("Attempt to assign non-existent role: {RoleName}", request.RoleName);
+            ModelState.AddModelError(nameof(request.RoleName), $"Role '{request.RoleName}' does not exist");
+            return BadRequest(ModelState);
+        }
+
+        // Get current roles
+        var currentRoles = await _userManager.GetRolesAsync(user);
+
+        // Check if user already has this role
+        if (currentRoles.Contains(request.RoleName))
+        {
+            _logger.LogInformation("User {Username} already has role {RoleName}", user.UserName, request.RoleName);
+            return Ok(new UserRolesResponse
+            {
+                UserId = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Roles = currentRoles.ToList()
+            });
+        }
+
+        // Add role to user (allows multiple roles)
+        var addResult = await _userManager.AddToRoleAsync(user, request.RoleName);
+        if (!addResult.Succeeded)
+        {
+            _logger.LogError("Failed to assign role {RoleName} to user {Username}. Errors: {Errors}",
+                request.RoleName, user.UserName, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+            foreach (var error in addResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return BadRequest(ModelState);
+        }
+
+        _logger.LogInformation("Role {RoleName} added to user {Username} by administrator. Current roles: {CurrentRoles}",
+            request.RoleName, user.UserName, string.Join(", ", currentRoles.Concat(new[] { request.RoleName })));
+
+        var updatedRoles = await _userManager.GetRolesAsync(user);
+        return Ok(new UserRolesResponse
+        {
+            UserId = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Roles = updatedRoles.ToList()
+        });
+    }
+
+    /// <summary>
+    /// Replaces all user roles with a single new role. Removes all existing roles and assigns the new one.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <param name="request">Role assignment data</param>
+    /// <returns>Updated user roles information</returns>
+    [HttpPut("{id}/roles")]
+    [ProducesResponseType(typeof(UserRolesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ChangeUserRole(Guid id, [FromBody] AssignRoleRequest request)
+    {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest(ModelState);
+        }
+
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("Attempt to change role for non-existent user: {UserId}", id);
+            return NotFound(new { message = "User not found" });
+        }
+
+        // Validate role exists
+        if (!await _roleManager.RoleExistsAsync(request.RoleName))
+        {
+            _logger.LogWarning("Attempt to assign non-existent role: {RoleName}", request.RoleName);
+            ModelState.AddModelError(nameof(request.RoleName), $"Role '{request.RoleName}' does not exist");
+            return BadRequest(ModelState);
+        }
+
+        // Get current roles
+        var currentRoles = await _userManager.GetRolesAsync(user);
+
+        // Remove all existing roles
+        if (currentRoles.Any())
+        {
+            var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
+            if (!removeResult.Succeeded)
+            {
+                _logger.LogError("Failed to remove existing roles from user {Username}. Errors: {Errors}",
+                    user.UserName, string.Join(", ", removeResult.Errors.Select(e => e.Description)));
+                return StatusCode(500, new { message = "Failed to remove existing roles" });
+            }
+            _logger.LogInformation("Removed roles {Roles} from user {Username}",
+                string.Join(", ", currentRoles), user.UserName);
+        }
+
+        // Assign new role
+        var addResult = await _userManager.AddToRoleAsync(user, request.RoleName);
+        if (!addResult.Succeeded)
+        {
+            _logger.LogError("Failed to assign role {RoleName} to user {Username}. Errors: {Errors}",
+                request.RoleName, user.UserName, string.Join(", ", addResult.Errors.Select(e => e.Description)));
+            foreach (var error in addResult.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+            return BadRequest(ModelState);
+        }
+
+        _logger.LogInformation("User {Username} role changed to {RoleName} by administrator. Previous roles: {PreviousRoles}",
+            user.UserName, request.RoleName, currentRoles.Any() ? string.Join(", ", currentRoles) : "none");
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return Ok(new UserRolesResponse
+        {
+            UserId = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Roles = roles.ToList()
+        });
+    }
+
+    /// <summary>
+    /// Removes a specific role from a user.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <param name="roleName">Role name to remove</param>
+    /// <returns>Updated user roles information</returns>
+    [HttpDelete("{id}/roles/{roleName}")]
+    [ProducesResponseType(typeof(UserRolesResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> RemoveRole(Guid id, string roleName)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("Attempt to remove role from non-existent user: {UserId}", id);
+            return NotFound(new { message = "User not found" });
+        }
+
+        // Validate role exists
+        if (!await _roleManager.RoleExistsAsync(roleName))
+        {
+            _logger.LogWarning("Attempt to remove non-existent role: {RoleName}", roleName);
+            return BadRequest(new { message = $"Role '{roleName}' does not exist" });
+        }
+
+        // Get current roles
+        var currentRoles = await _userManager.GetRolesAsync(user);
+
+        // Check if user has this role
+        if (!currentRoles.Contains(roleName))
+        {
+            _logger.LogInformation("User {Username} does not have role {RoleName}", user.UserName, roleName);
+            return Ok(new UserRolesResponse
+            {
+                UserId = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Roles = currentRoles.ToList()
+            });
+        }
+
+        // Remove role
+        var removeResult = await _userManager.RemoveFromRoleAsync(user, roleName);
+        if (!removeResult.Succeeded)
+        {
+            _logger.LogError("Failed to remove role {RoleName} from user {Username}. Errors: {Errors}",
+                roleName, user.UserName, string.Join(", ", removeResult.Errors.Select(e => e.Description)));
+            return StatusCode(500, new { message = "Failed to remove role" });
+        }
+
+        _logger.LogInformation("Role {RoleName} removed from user {Username} by administrator. Remaining roles: {RemainingRoles}",
+            roleName, user.UserName, string.Join(", ", currentRoles.Where(r => r != roleName)));
+
+        var updatedRoles = await _userManager.GetRolesAsync(user);
+        return Ok(new UserRolesResponse
+        {
+            UserId = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Roles = updatedRoles.ToList()
+        });
+    }
 }
 

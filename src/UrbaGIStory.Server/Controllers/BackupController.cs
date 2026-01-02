@@ -80,6 +80,11 @@ public class BackupController : ControllerBase
     [ProducesResponseType(StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> RestoreBackup([FromBody] RestoreRequest? request = null)
     {
+        if (request == null)
+        {
+            return BadRequest(new { message = "RestoreRequest is required" });
+        }
+
         if (!ModelState.IsValid)
         {
             return BadRequest(ModelState);

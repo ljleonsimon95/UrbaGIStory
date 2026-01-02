@@ -54,6 +54,8 @@ Este directorio contiene todas las colecciones de Postman para la API de UrbaGIS
   - `POST /api/Users/{id}/roles` - Agregar rol a usuario (permite múltiples roles)
   - `PUT /api/Users/{id}/roles` - Reemplazar todos los roles con uno nuevo
   - `DELETE /api/Users/{id}/roles/{roleName}` - Eliminar un rol específico del usuario
+  - `DELETE /api/Users/{id}` - Desactivar usuario (soft delete)
+  - `POST /api/Users/{id}/activate` - Reactivar usuario desactivado
 - **Características:** Requiere rol `TechnicalAdministrator`
 
 ## Environment

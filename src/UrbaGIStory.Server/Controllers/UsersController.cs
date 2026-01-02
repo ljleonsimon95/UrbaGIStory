@@ -238,14 +238,7 @@ public class UsersController : ControllerBase
         // Filter by active status
         if (request.IsActive.HasValue)
         {
-            if (request.IsActive.Value)
-            {
-                allUsers = allUsers.Where(u => !u.LockoutEnabled || u.LockoutEnd == null || u.LockoutEnd <= DateTimeOffset.UtcNow);
-            }
-            else
-            {
-                allUsers = allUsers.Where(u => u.LockoutEnabled && u.LockoutEnd != null && u.LockoutEnd > DateTimeOffset.UtcNow);
-            }
+            allUsers = allUsers.Where(u => u.IsActive == request.IsActive.Value);
         }
 
         // Search by username or email
@@ -277,7 +270,7 @@ public class UsersController : ControllerBase
                 Username = user.UserName ?? string.Empty,
                 Email = user.Email ?? string.Empty,
                 Roles = roles.ToList(),
-                IsActive = !user.LockoutEnabled || user.LockoutEnd == null || user.LockoutEnd <= DateTimeOffset.UtcNow,
+                IsActive = user.IsActive,
                 CreatedAt = DateTime.UtcNow // Placeholder, would need to track creation date
             });
         }
@@ -559,6 +552,134 @@ public class UsersController : ControllerBase
             UserId = user.Id,
             Username = user.UserName ?? string.Empty,
             Roles = updatedRoles.ToList()
+        });
+    }
+
+    /// <summary>
+    /// Deactivates a user (soft delete). The user cannot log in but their data remains.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <returns>Deactivated user information</returns>
+    [HttpDelete("{id}")]
+    [ProducesResponseType(typeof(UserDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> DeactivateUser(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("Attempt to deactivate non-existent user: {UserId}", id);
+            return NotFound(new { message = "User not found" });
+        }
+
+        if (!user.IsActive)
+        {
+            _logger.LogInformation("User {Username} is already deactivated", user.UserName);
+            var existingRoles = await _userManager.GetRolesAsync(user);
+            return Ok(new UserDetailResponse
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Roles = existingRoles.ToList(),
+                IsActive = false,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Get current user (administrator performing the action)
+        var currentUserIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) 
+            ?? User.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub);
+        var currentUserId = currentUserIdClaim != null && Guid.TryParse(currentUserIdClaim.Value, out var adminId) 
+            ? adminId 
+            : (Guid?)null;
+
+        // Deactivate user
+        user.IsActive = false;
+        user.DeactivatedAt = DateTime.UtcNow;
+        user.DeactivatedBy = currentUserId;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            _logger.LogError("Failed to deactivate user {Username}. Errors: {Errors}",
+                user.UserName, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+            return StatusCode(500, new { message = "Failed to deactivate user" });
+        }
+
+        _logger.LogInformation("User {Username} deactivated by administrator {AdminId} at {DeactivatedAt}",
+            user.UserName, currentUserId, user.DeactivatedAt);
+
+        var deactivatedUserRoles = await _userManager.GetRolesAsync(user);
+        return Ok(new UserDetailResponse
+        {
+            Id = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Roles = deactivatedUserRoles.ToList(),
+            IsActive = false,
+            CreatedAt = DateTime.UtcNow
+        });
+    }
+
+    /// <summary>
+    /// Reactivates a previously deactivated user.
+    /// </summary>
+    /// <param name="id">User ID</param>
+    /// <returns>Reactivated user information</returns>
+    [HttpPost("{id}/activate")]
+    [ProducesResponseType(typeof(UserDetailResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<IActionResult> ReactivateUser(Guid id)
+    {
+        var user = await _userManager.FindByIdAsync(id.ToString());
+        if (user == null)
+        {
+            _logger.LogWarning("Attempt to reactivate non-existent user: {UserId}", id);
+            return NotFound(new { message = "User not found" });
+        }
+
+        if (user.IsActive)
+        {
+            _logger.LogInformation("User {Username} is already active", user.UserName);
+            var existingRoles = await _userManager.GetRolesAsync(user);
+            return Ok(new UserDetailResponse
+            {
+                Id = user.Id,
+                Username = user.UserName ?? string.Empty,
+                Email = user.Email ?? string.Empty,
+                Roles = existingRoles.ToList(),
+                IsActive = true,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        // Reactivate user
+        user.IsActive = true;
+        user.DeactivatedAt = null;
+        user.DeactivatedBy = null;
+
+        var updateResult = await _userManager.UpdateAsync(user);
+        if (!updateResult.Succeeded)
+        {
+            _logger.LogError("Failed to reactivate user {Username}. Errors: {Errors}",
+                user.UserName, string.Join(", ", updateResult.Errors.Select(e => e.Description)));
+            return StatusCode(500, new { message = "Failed to reactivate user" });
+        }
+
+        _logger.LogInformation("User {Username} reactivated by administrator", user.UserName);
+
+        var reactivatedUserRoles = await _userManager.GetRolesAsync(user);
+        return Ok(new UserDetailResponse
+        {
+            Id = user.Id,
+            Username = user.UserName ?? string.Empty,
+            Email = user.Email ?? string.Empty,
+            Roles = reactivatedUserRoles.ToList(),
+            IsActive = true,
+            CreatedAt = DateTime.UtcNow
         });
     }
 }

@@ -55,6 +55,13 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials" });
         }
 
+        // Check if user is active
+        if (!user.IsActive)
+        {
+            _logger.LogWarning("Login attempt by deactivated user: {Username}", request.Username);
+            return Unauthorized(new { message = "User account is deactivated" });
+        }
+
         // Verify password
         var isValidPassword = await _userManager.CheckPasswordAsync(user, request.Password);
         if (!isValidPassword)

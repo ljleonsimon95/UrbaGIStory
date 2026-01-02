@@ -192,8 +192,6 @@ public class BackupService
             var backupFile = backupFileRaw
                 .FirstOrDefault(f => Path.GetFileNameWithoutExtension(f) == request.BackupId);
 
-            string? name = Path.GetFileNameWithoutExtension(backupFileRaw[0]);
-
             if (backupFile == null || !File.Exists(backupFile))
             {
                 throw new EntityNotFoundException($"Backup file not found: {request.BackupId}");

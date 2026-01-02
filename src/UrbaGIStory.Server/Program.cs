@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
@@ -14,7 +15,19 @@ var configuration = builder.Configuration;
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Include XML comments
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+
+    // Note: JWT Bearer authentication configuration will be added in Story 2.1
+    // when AuthController is implemented. For now, Swagger works with XML comments.
+});
 
 // Configure EF Core with PostgreSQL and PostGIS
 builder.Services.AddDbContext<AppDbContext>(options =>

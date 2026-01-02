@@ -1,0 +1,255 @@
+{
+	"info": {
+		"_postman_id": "urbagistory-systemadmin-collection",
+		"name": "UrbaGIStory API - System Administration",
+		"description": "System administration endpoints for UrbaGIStory\n\n## Setup Instructions:\n1. Import this collection into Postman\n2. Use the same environment as other collections:\n   - `baseUrl`: http://localhost:5064\n   - `token`: (must be set from Auth collection login)\n3. Make sure you've logged in using the Auth collection first\n4. All endpoints require TechnicalAdministrator role",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get QGIS Config",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/qgis-config",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"qgis-config"
+					]
+				},
+				"description": "Gets the current QGIS → PostgreSQL/PostGIS connection configuration. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Update QGIS Config",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"host\": \"localhost\",\n  \"port\": 5432,\n  \"database\": \"UrbaGIStory\",\n  \"username\": \"sa\",\n  \"password\": \"sa\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/qgis-config",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"qgis-config"
+					]
+				},
+				"description": "Updates the QGIS → PostgreSQL/PostGIS connection configuration. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Get System Config",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/system-config",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"system-config"
+					]
+				},
+				"description": "Gets the current system configuration. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Update System Config",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"maxUploadSize\": 10485760,\n  \"allowedFileTypes\": \".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png\",\n  \"sessionTimeout\": 30,\n  \"maintenanceMode\": false\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/system-config",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"system-config"
+					]
+				},
+				"description": "Updates the system configuration. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Load Categories",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"forceReload\": false\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/categories/load",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"categories",
+						"load"
+					]
+				},
+				"description": "Loads predefined categories into the system. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Get System Status",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/SystemAdmin/status",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"SystemAdmin",
+						"status"
+					]
+				},
+				"description": "Gets comprehensive system status information including database, PostGIS, and system health. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Authorization header for authenticated requests",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer') {",
+					"    var token = pm.environment.get('token');",
+					"    if (token && pm.request.auth.bearer) {",
+					"        // Ensure bearer array exists and has at least one element",
+					"        if (!pm.request.auth.bearer[0]) {",
+					"            pm.request.auth.bearer[0] = { key: 'token', value: '', type: 'string' };",
+					"        }",
+					"        // Only set if current value is empty or is the placeholder",
+					"        if (!pm.request.auth.bearer[0].value || pm.request.auth.bearer[0].value === '{{token}}') {",
+					"            pm.request.auth.bearer[0].value = token;",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5064",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

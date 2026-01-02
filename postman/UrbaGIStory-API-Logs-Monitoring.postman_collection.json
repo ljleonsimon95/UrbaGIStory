@@ -1,0 +1,298 @@
+{
+	"info": {
+		"_postman_id": "urbagistory-logs-monitoring-collection",
+		"name": "UrbaGIStory API - Logs & Monitoring",
+		"description": "Logging and monitoring operations for UrbaGIStory\n\n## Setup Instructions:\n1. Import this collection into Postman\n2. Use the same environment as the main API collection:\n   - `baseUrl`: http://localhost:5064\n   - `token`: (must be set from main collection login)\n3. Make sure you've logged in using the main API collection first\n4. All endpoints require TechnicalAdministrator role\n\n## Testing Tips:\n- First, make some API requests to generate logs\n- Then use List Logs to see the generated entries\n- Use filters to test different scenarios\n- Check Performance Metrics to see request statistics",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "List Logs",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Logs?Page=1&PageSize=50",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Logs"
+					],
+					"query": [
+						{
+							"key": "Page",
+							"value": "1",
+							"description": "Page number (1-based)"
+						},
+						{
+							"key": "PageSize",
+							"value": "50",
+							"description": "Number of items per page (1-100)"
+						},
+						{
+							"key": "Level",
+							"value": "",
+							"description": "Filter by log level (Information, Warning, Error, Critical). Leave empty for all.",
+							"disabled": true
+						},
+						{
+							"key": "FromDate",
+							"value": "",
+							"description": "Start date (UTC) - format: 2025-01-02T00:00:00Z",
+							"disabled": true
+						},
+						{
+							"key": "ToDate",
+							"value": "",
+							"description": "End date (UTC) - format: 2025-01-02T23:59:59Z",
+							"disabled": true
+						},
+						{
+							"key": "SearchTerm",
+							"value": "",
+							"description": "Search term to filter log messages",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Gets filtered and paginated log entries.\n\n**Query Parameters:**\n- `Page`: Page number (default: 1)\n- `PageSize`: Items per page (default: 50, max: 100)\n- `Level`: Filter by log level (Information, Warning, Error, Critical)\n- `FromDate`: Start date in UTC (ISO 8601 format)\n- `ToDate`: End date in UTC (ISO 8601 format)\n- `SearchTerm`: Search term to filter log messages\n\n**Example Filters:**\n- Only errors: `?Level=Error`\n- Last hour: `?FromDate=2025-01-02T10:00:00Z&ToDate=2025-01-02T11:00:00Z`\n- Search: `?SearchTerm=backup`"
+			},
+			"response": []
+		},
+		{
+			"name": "List Logs - Errors Only",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Logs?Level=Error&Page=1&PageSize=50",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Logs"
+					],
+					"query": [
+						{
+							"key": "Level",
+							"value": "Error"
+						},
+						{
+							"key": "Page",
+							"value": "1"
+						},
+						{
+							"key": "PageSize",
+							"value": "50"
+						}
+					]
+				},
+				"description": "Gets only error-level log entries. Useful for troubleshooting issues."
+			},
+			"response": []
+		},
+		{
+			"name": "List Logs - Last Hour",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Logs?FromDate={{fromDate}}&ToDate={{toDate}}&Page=1&PageSize=50",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Logs"
+					],
+					"query": [
+						{
+							"key": "FromDate",
+							"value": "{{fromDate}}",
+							"description": "1 hour ago (UTC)"
+						},
+						{
+							"key": "ToDate",
+							"value": "{{toDate}}",
+							"description": "Now (UTC)"
+						},
+						{
+							"key": "Page",
+							"value": "1"
+						},
+						{
+							"key": "PageSize",
+							"value": "50"
+						}
+					]
+				},
+				"description": "Gets log entries from the last hour. Note: You need to set `fromDate` and `toDate` environment variables with ISO 8601 format dates."
+			},
+			"response": []
+		},
+		{
+			"name": "Export Logs",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Logs/export?Page=1&PageSize=100",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Logs",
+						"export"
+					],
+					"query": [
+						{
+							"key": "Page",
+							"value": "1"
+						},
+						{
+							"key": "PageSize",
+							"value": "100"
+						},
+						{
+							"key": "Level",
+							"value": "",
+							"description": "Filter by log level",
+							"disabled": true
+						},
+						{
+							"key": "FromDate",
+							"value": "",
+							"description": "Start date (UTC)",
+							"disabled": true
+						},
+						{
+							"key": "ToDate",
+							"value": "",
+							"description": "End date (UTC)",
+							"disabled": true
+						},
+						{
+							"key": "SearchTerm",
+							"value": "",
+							"description": "Search term",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Exports logs as a JSON file. The same filters as List Logs can be applied.\n\n**Note:** Postman will download the file automatically. You can save it for analysis."
+			},
+			"response": []
+		},
+		{
+			"name": "Get Performance Metrics",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Monitoring/metrics",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Monitoring",
+						"metrics"
+					]
+				},
+				"description": "Gets current system performance metrics including:\n- Request metrics (total count, average duration, slow requests)\n- Database query metrics (total count, average duration, slow queries)\n- Error metrics (total errors, errors in last hour)\n- System information (server time, uptime)\n\n**Note:** Metrics are tracked in-memory and reset when the application restarts. Make some API requests first to see meaningful data."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Authorization header for authenticated requests",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer') {",
+					"    var token = pm.environment.get('token');",
+					"    if (token && pm.request.auth.bearer) {",
+					"        // Ensure bearer array exists and has at least one element",
+					"        if (!pm.request.auth.bearer[0]) {",
+					"            pm.request.auth.bearer[0] = { key: 'token', value: '', type: 'string' };",
+					"        }",
+					"        // Only set if current value is empty or is the placeholder",
+					"        if (!pm.request.auth.bearer[0].value || pm.request.auth.bearer[0].value === '{{token}}') {",
+					"            pm.request.auth.bearer[0].value = token;",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5064",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

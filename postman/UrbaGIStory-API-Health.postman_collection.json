@@ -1,0 +1,67 @@
+{
+	"info": {
+		"_postman_id": "urbagistory-health-collection",
+		"name": "UrbaGIStory API - Health",
+		"description": "Health check endpoints for UrbaGIStory\n\n## Setup Instructions:\n1. Import this collection into Postman\n2. Use the same environment as other collections:\n   - `baseUrl`: http://localhost:5064\n3. These endpoints do not require authentication",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Check Database",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Health/database",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Health",
+						"database"
+					]
+				},
+				"description": "Checks database connection and PostGIS status. Returns connection status and PostGIS version information."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Authorization header for authenticated requests",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer') {",
+					"    var token = pm.environment.get('token');",
+					"    if (token && pm.request.auth.bearer) {",
+					"        // Ensure bearer array exists and has at least one element",
+					"        if (!pm.request.auth.bearer[0]) {",
+					"            pm.request.auth.bearer[0] = { key: 'token', value: '', type: 'string' };",
+					"        }",
+					"        // Only set if current value is empty or is the placeholder",
+					"        if (!pm.request.auth.bearer[0].value || pm.request.auth.bearer[0].value === '{{token}}') {",
+					"            pm.request.auth.bearer[0].value = token;",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5064",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

@@ -1,0 +1,157 @@
+{
+	"info": {
+		"_postman_id": "urbagistory-backup-collection",
+		"name": "UrbaGIStory API - Backup & Restore",
+		"description": "Database backup and restore operations for UrbaGIStory\n\n## Setup Instructions:\n1. Import this collection into Postman\n2. Use the same environment as the main API collection:\n   - `baseUrl`: http://localhost:5064\n   - `token`: (must be set from main collection login)\n3. Make sure you've logged in using the main API collection first\n4. All endpoints require TechnicalAdministrator role",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create Backup",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Backup",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Backup"
+					]
+				},
+				"description": "Creates a new database backup. The backup includes all database data, schema, and PostGIS spatial data.\n\n**Requirements:**\n- TechnicalAdministrator role\n- PostgreSQL tools (pg_dump) must be available\n\n**Response:**\n- Returns backup information including filename, path, size, and creation date"
+			},
+			"response": []
+		},
+		{
+			"name": "List Backups",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Backup",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Backup"
+					]
+				},
+				"description": "Lists all available database backups with metadata.\n\n**Requirements:**\n- TechnicalAdministrator role\n\n**Response:**\n- Returns list of backups with:\n  - Backup ID (filename without extension)\n  - Filename\n  - Size (bytes and formatted)\n  - Creation date"
+			},
+			"response": []
+		},
+		{
+			"name": "Restore Backup",
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"backupId\": \"UrbaGIStory_backup_20250102_120000\",\n  \"createBackupBeforeRestore\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Backup/:backupId/restore",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Backup",
+						":backupId",
+						"restore"
+					],
+					"variable": [
+						{
+							"key": "backupId",
+							"value": "UrbaGIStory_backup_20250102_120000",
+							"description": "ID or filename of the backup to restore (without .dump extension). Get this from the List Backups response."
+						}
+					]
+				},
+				"description": "Restores the database from a backup file.\n\n**Requirements:**\n- TechnicalAdministrator role\n- PostgreSQL tools (pg_restore) must be available\n- Valid backup ID from List Backups\n\n**Safety Features:**\n- By default, creates an automatic backup before restoring (safety measure)\n- Can be disabled by setting `createBackupBeforeRestore: false`\n\n**Important:**\n- This operation will replace the current database with the backup data\n- Make sure you have a recent backup before restoring\n- Replace `:backupId` in the URL with the actual backup ID from List Backups response"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Authorization header for authenticated requests",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer') {",
+					"    var token = pm.environment.get('token');",
+					"    if (token && pm.request.auth.bearer) {",
+					"        // Ensure bearer array exists and has at least one element",
+					"        if (!pm.request.auth.bearer[0]) {",
+					"            pm.request.auth.bearer[0] = { key: 'token', value: '', type: 'string' };",
+					"        }",
+					"        // Only set if current value is empty or is the placeholder",
+					"        if (!pm.request.auth.bearer[0].value || pm.request.auth.bearer[0].value === '{{token}}') {",
+					"            pm.request.auth.bearer[0].value = token;",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5064",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

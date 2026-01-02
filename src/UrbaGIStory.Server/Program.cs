@@ -16,6 +16,18 @@ var configuration = builder.Configuration;
 // Add services to the container
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+
+// Configure Authorization
+builder.Services.AddAuthorization(options =>
+{
+    // Configure role-based authorization
+    options.AddPolicy("TechnicalAdministrator", policy => 
+        policy.RequireRole("TechnicalAdministrator"));
+    options.AddPolicy("OfficeManager", policy => 
+        policy.RequireRole("OfficeManager"));
+    options.AddPolicy("Specialist", policy => 
+        policy.RequireRole("Specialist"));
+});
 builder.Services.AddSwaggerGen(options =>
 {
     // API Information
@@ -102,7 +114,76 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey)),
-        ClockSkew = TimeSpan.Zero // Remove delay of token expiration
+        ClockSkew = TimeSpan.Zero, // Remove delay of token expiration
+        // Map the "role" claim from JWT to ClaimTypes.Role for authorization
+        RoleClaimType = "role",
+        // Also set NameClaimType for consistency
+        NameClaimType = System.Security.Claims.ClaimTypes.Name
+    };
+
+    // Add event handlers for debugging
+    options.Events = new Microsoft.AspNetCore.Authentication.JwtBearer.JwtBearerEvents
+    {
+        OnTokenValidated = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                .GetRequiredService<ILogger<Program>>();
+            
+            var claims = context.Principal?.Claims.Select(c => $"{c.Type}={c.Value}").ToList() ?? new List<string>();
+            var roles = context.Principal?.Claims
+                .Where(c => c.Type == "role" || c.Type == System.Security.Claims.ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList() ?? new List<string>();
+            
+            logger.LogInformation("JWT Token Validated - Claims: {Claims}", string.Join(", ", claims));
+            logger.LogInformation("JWT Token Validated - Roles: {Roles}", string.Join(", ", roles));
+            
+            // DEBUG: Check if user is in role
+            if (context.Principal != null)
+            {
+                var isInRole = context.Principal.IsInRole("TechnicalAdministrator");
+                logger.LogInformation("JWT Token Validated - IsInRole(TechnicalAdministrator): {IsInRole}", isInRole);
+                
+                // CRITICAL FIX: Create a new ClaimsIdentity with correct RoleClaimType
+                // The existing identity has RoleClaimType set incorrectly, so we need to recreate it
+                var oldIdentity = context.Principal.Identity as System.Security.Claims.ClaimsIdentity;
+                if (oldIdentity != null)
+                {
+                    // Create new identity with correct RoleClaimType
+                    var newIdentity = new System.Security.Claims.ClaimsIdentity(
+                        oldIdentity.Claims,
+                        oldIdentity.AuthenticationType,
+                        oldIdentity.NameClaimType,
+                        System.Security.Claims.ClaimTypes.Role); // Set RoleClaimType here
+                    
+                    // Create new principal with the corrected identity
+                    var newPrincipal = new System.Security.Claims.ClaimsPrincipal(newIdentity);
+                    context.Principal = newPrincipal;
+                    
+                    logger.LogInformation("Created new ClaimsIdentity with RoleClaimType: {RoleClaimType}", newIdentity.RoleClaimType);
+                    
+                    // Verify roles exist
+                    var identityRoles = newIdentity.Claims
+                        .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+                        .Select(c => c.Value)
+                        .ToList();
+                    logger.LogInformation("Roles found in new identity: {Roles}", string.Join(", ", identityRoles));
+                    
+                    // Test IsInRole after recreating identity
+                    var testIsInRole = newPrincipal.IsInRole("TechnicalAdministrator");
+                    logger.LogInformation("After recreating identity - IsInRole(TechnicalAdministrator): {IsInRole}", testIsInRole);
+                }
+            }
+            
+            return Task.CompletedTask;
+        },
+        OnAuthenticationFailed = context =>
+        {
+            var logger = context.HttpContext.RequestServices
+                .GetRequiredService<ILogger<Program>>();
+            logger.LogError(context.Exception, "JWT Authentication Failed");
+            return Task.CompletedTask;
+        }
     };
 });
 

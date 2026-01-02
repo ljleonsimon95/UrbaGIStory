@@ -79,10 +79,10 @@ public class AuthController : ControllerBase
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 
-        // Add role claims
+        // Add role claims - use "role" claim type for JWT standard
         foreach (var role in roles)
         {
-            claims.Add(new Claim(ClaimTypes.Role, role));
+            claims.Add(new Claim("role", role));
         }
 
         var token = new JwtSecurityToken(
@@ -95,7 +95,15 @@ public class AuthController : ControllerBase
 
         var tokenString = new JwtSecurityTokenHandler().WriteToken(token);
 
+        // DEBUG: Log token details
         _logger.LogInformation("User {Username} logged in successfully", user.UserName);
+        _logger.LogInformation("Token generated - Roles in token: {Roles}", string.Join(", ", roles));
+        
+        // Decode token to verify claims
+        var handler = new JwtSecurityTokenHandler();
+        var jsonToken = handler.ReadJwtToken(tokenString);
+        var tokenClaims = jsonToken.Claims.Select(c => $"{c.Type}={c.Value}").ToList();
+        _logger.LogInformation("Token claims: {Claims}", string.Join(", ", tokenClaims));
 
         return Ok(new LoginResponse
         {
@@ -109,6 +117,39 @@ public class AuthController : ControllerBase
                 Roles = roles.ToList()
             }
         });
+    }
+
+    /// <summary>
+    /// DEBUG: Decodes and shows JWT token contents
+    /// </summary>
+    [HttpPost("debug/decode-token")]
+    public IActionResult DecodeToken([FromBody] string token)
+    {
+        try
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jsonToken = handler.ReadJwtToken(token);
+            
+            var claims = jsonToken.Claims.Select(c => new { c.Type, c.Value }).ToList();
+            var roles = jsonToken.Claims
+                .Where(c => c.Type == "role" || c.Type == ClaimTypes.Role)
+                .Select(c => c.Value)
+                .ToList();
+
+            return Ok(new
+            {
+                Valid = true,
+                Issuer = jsonToken.Issuer,
+                Audience = jsonToken.Audiences,
+                Expires = jsonToken.ValidTo,
+                Roles = roles,
+                AllClaims = claims
+            });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Valid = false, Error = ex.Message });
+        }
     }
 }
 

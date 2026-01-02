@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,7 @@ public class SystemAdminController : ControllerBase
         _configuration = configuration;
         _logger = logger;
     }
+
 
     /// <summary>
     /// Gets the current QGIS → PostgreSQL/PostGIS connection configuration.

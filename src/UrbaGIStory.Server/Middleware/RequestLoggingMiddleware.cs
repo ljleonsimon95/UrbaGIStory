@@ -44,8 +44,28 @@ public class RequestLoggingMiddleware
             var duration = stopwatch.ElapsedMilliseconds;
             var statusCode = context.Response.StatusCode;
 
-            // Log request completion
-            if (duration > SlowRequestThresholdMs)
+            // Log request completion with special handling for authorization failures
+            if (statusCode == 403)
+            {
+                var userId = context.User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value 
+                    ?? context.User?.FindFirst(System.IdentityModel.Tokens.Jwt.JwtRegisteredClaimNames.Sub)?.Value 
+                    ?? "Anonymous";
+                var username = context.User?.Identity?.Name ?? "Unknown";
+                var roles = string.Join(", ", context.User?.Claims
+                    .Where(c => c.Type == "role" || c.Type == System.Security.Claims.ClaimTypes.Role)
+                    .Select(c => c.Value) ?? Array.Empty<string>());
+
+                _logger.LogWarning(
+                    "Unauthorized access attempt: {Method} {Path} | User: {Username} (ID: {UserId}) | Roles: [{Roles}] | Status: {StatusCode} | TraceId: {TraceId}",
+                    requestMethod,
+                    requestPath,
+                    username,
+                    userId,
+                    string.IsNullOrEmpty(roles) ? "None" : roles,
+                    statusCode,
+                    traceId);
+            }
+            else if (duration > SlowRequestThresholdMs)
             {
                 _logger.LogWarning(
                     "Slow request detected: {Method} {Path} | Status: {StatusCode} | Duration: {Duration}ms | TraceId: {TraceId}",

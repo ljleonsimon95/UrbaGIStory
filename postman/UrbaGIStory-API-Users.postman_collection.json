@@ -1,0 +1,668 @@
+{
+	"info": {
+		"_postman_id": "urbagistory-users-collection",
+		"name": "UrbaGIStory API - User Management",
+		"description": "User management endpoints for UrbaGIStory\n\n## Setup Instructions:\n1. Import this collection into Postman\n2. Use the same environment as the Auth collection with:\n   - `baseUrl`: http://localhost:5064\n   - `token`: JWT token from login (set automatically)\n3. All endpoints require TechnicalAdministrator role\n4. Make sure you're logged in as a TechnicalAdministrator before using these endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Create User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Response has user information\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('username');",
+							"    pm.expect(jsonData).to.have.property('email');",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"newuser\",\n  \"email\": \"newuser@urbagistory.local\",\n  \"password\": \"NewPassword123!\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users"
+					]
+				},
+				"description": "Creates a new user account. The user will be assigned the default role (Specialist). Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "List Users",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has users list\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('users');",
+							"    pm.expect(jsonData).to.have.property('totalCount');",
+							"    pm.expect(jsonData).to.have.property('page');",
+							"    pm.expect(jsonData).to.have.property('pageSize');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users?page=1&pageSize=20",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "1",
+							"description": "Page number (default: 1)"
+						},
+						{
+							"key": "pageSize",
+							"value": "20",
+							"description": "Page size (default: 20, max: 100)"
+						},
+						{
+							"key": "role",
+							"value": "",
+							"description": "Filter by role (optional)",
+							"disabled": true
+						},
+						{
+							"key": "isActive",
+							"value": "",
+							"description": "Filter by active status (true/false, optional)",
+							"disabled": true
+						},
+						{
+							"key": "searchTerm",
+							"value": "",
+							"description": "Search by username or email (optional)",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Gets a paginated list of users with optional filtering and search. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Get User by ID",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has user information\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('username');",
+							"    pm.expect(jsonData).to.have.property('email');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Gets a specific user by ID. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Update User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated user information\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('id');",
+							"    pm.expect(jsonData).to.have.property('username');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"username\": \"updateduser\",\n  \"email\": \"updateduser@urbagistory.local\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Updates an existing user's information. To change password, include both 'password' and 'currentPassword' fields. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Get User Roles",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has roles information\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('userId');",
+							"    pm.expect(jsonData).to.have.property('username');",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Gets the roles assigned to a specific user. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Assign Role to User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"    pm.expect(jsonData.roles).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roleName\": \"Specialist\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Adds a role to a user. Users can have multiple roles. If the user already has this role, no action is taken. Valid roles: TechnicalAdministrator, OfficeManager, Specialist. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Change User Role",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"roleName\": \"OfficeManager\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Replaces all user roles with a single new role. Removes ALL existing roles and assigns the new one. Valid roles: TechnicalAdministrator, OfficeManager, Specialist. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Role from User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has updated roles\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('roles');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/roles/:roleName",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"roles",
+						":roleName"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						},
+						{
+							"key": "roleName",
+							"value": "Specialist",
+							"description": "Role name to remove (TechnicalAdministrator, OfficeManager, or Specialist)"
+						}
+					]
+				},
+				"description": "Removes a specific role from a user. If the user doesn't have this role, no action is taken. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Deactivate User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User is deactivated\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.isActive).to.be.false;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Deactivates a user (soft delete). The user cannot log in but their data remains in the database. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		},
+		{
+			"name": "Reactivate User",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"User is reactivated\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.isActive).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{token}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/Users/:id/activate",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"Users",
+						":id",
+						"activate"
+					],
+					"variable": [
+						{
+							"key": "id",
+							"value": "00000000-0000-0000-0000-000000000000",
+							"description": "User ID (GUID)"
+						}
+					]
+				},
+				"description": "Reactivates a previously deactivated user. The user can log in again. Requires TechnicalAdministrator role."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Auto-set Authorization header for authenticated requests",
+					"if (pm.request.auth && pm.request.auth.type === 'bearer') {",
+					"    var token = pm.environment.get('token');",
+					"    if (token && pm.request.auth.bearer) {",
+					"        if (!pm.request.auth.bearer[0]) {",
+					"            pm.request.auth.bearer[0] = { key: 'token', value: '', type: 'string' };",
+					"        }",
+					"        if (!pm.request.auth.bearer[0].value || pm.request.auth.bearer[0].value === '{{token}}') {",
+					"            pm.request.auth.bearer[0].value = token;",
+					"        }",
+					"    }",
+					"}"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:5064",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

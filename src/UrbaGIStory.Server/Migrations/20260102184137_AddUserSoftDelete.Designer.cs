@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UrbaGIStory.Server.Data;
@@ -11,9 +12,11 @@ using UrbaGIStory.Server.Data;
 namespace UrbaGIStory.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260102184137_AddUserSoftDelete")]
+    partial class AddUserSoftDelete
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -210,13 +213,6 @@ namespace UrbaGIStory.Server.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("boolean");
 
-                    b.Property<byte[]>("RowVersion")
-                        .IsConcurrencyToken()
-                        .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("bytea")
-                        .HasComment("Row version used for optimistic concurrency control. Automatically updated by the database on each update.");
-
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("text");
 
@@ -237,64 +233,6 @@ namespace UrbaGIStory.Server.Migrations
                         .HasDatabaseName("UserNameIndex");
 
                     b.ToTable("AspNetUsers", (string)null);
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.Permission", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasComment("Unique identifier for the permission.");
-
-                    b.Property<bool>("CanRead")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether the user can read/view the entity.");
-
-                    b.Property<bool>("CanWrite")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether the user can write/edit the entity.");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the permission was created (UTC).");
-
-                    b.Property<Guid>("CreatedBy")
-                        .HasColumnType("uuid")
-                        .HasComment("ID of the Office Manager who created this permission.");
-
-                    b.Property<Guid>("EntityId")
-                        .HasColumnType("uuid")
-                        .HasComment("ID of the entity this permission applies to.");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the permission was last updated (UTC).");
-
-                    b.Property<Guid?>("UpdatedBy")
-                        .HasColumnType("uuid")
-                        .HasComment("ID of the Office Manager who last updated this permission.");
-
-                    b.Property<Guid>("UserId")
-                        .HasColumnType("uuid")
-                        .HasComment("ID of the user who has this permission.");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("EntityId")
-                        .HasDatabaseName("IX_Permissions_EntityId");
-
-                    b.HasIndex("UserId")
-                        .HasDatabaseName("IX_Permissions_UserId");
-
-                    b.HasIndex("UserId", "EntityId")
-                        .IsUnique()
-                        .HasDatabaseName("IX_Permissions_UserId_EntityId");
-
-                    b.ToTable("Permissions", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<System.Guid>", b =>
@@ -346,17 +284,6 @@ namespace UrbaGIStory.Server.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.Permission", b =>
-                {
-                    b.HasOne("UrbaGIStory.Server.Identity.ApplicationUser", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
                 });
 #pragma warning restore 612, 618
         }

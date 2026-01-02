@@ -43,6 +43,15 @@ Este directorio contiene todas las colecciones de Postman para la API de UrbaGIS
   - `GET /api/Monitoring/metrics` - Obtener métricas de rendimiento
 - **Características:** Requiere rol `TechnicalAdministrator`
 
+### 6. **UrbaGIStory-API-Users.postman_collection.json**
+- **Propósito:** Gestión de usuarios
+- **Endpoints:**
+  - `POST /api/Users` - Crear nuevo usuario
+  - `GET /api/Users` - Listar usuarios con filtros y paginación
+  - `GET /api/Users/{id}` - Obtener usuario por ID
+  - `PUT /api/Users/{id}` - Actualizar usuario
+- **Características:** Requiere rol `TechnicalAdministrator`
+
 ## Environment
 
 ### **UrbaGIStory-API.postman_environment.json**
@@ -67,6 +76,7 @@ Archivo de environment con las variables:
    - **SystemAdmin** para administración
    - **Backup** para operaciones de backup/restore
    - **Logs-Monitoring** para ver logs y métricas
+   - **Users** para gestión de usuarios
 
 ### 3. Autenticación Automática
 
@@ -81,7 +91,7 @@ No necesitas configurar el token manualmente en cada request.
 - **Token compartido:** Todas las colecciones usan el mismo token del environment
 - **Orden de ejecución:** Siempre ejecuta `Login` primero para establecer el token
 - **Roles requeridos:** 
-  - SystemAdmin, Backup y Logs-Monitoring requieren rol `TechnicalAdministrator`
+  - SystemAdmin, Backup, Logs-Monitoring y Users requieren rol `TechnicalAdministrator`
   - Health no requiere autenticación
 - **Base URL:** Por defecto es `http://localhost:5064`, cámbiala en el environment si es necesario
 

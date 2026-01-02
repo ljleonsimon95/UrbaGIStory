@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using UrbaGIStory.Server.Data;
 using UrbaGIStory.Server.Identity;
+using UrbaGIStory.Server.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -99,6 +100,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Global exception handler middleware - must be early in pipeline
+app.UseMiddleware<GlobalExceptionHandlerMiddleware>();
 
 app.UseHttpsRedirection();
 

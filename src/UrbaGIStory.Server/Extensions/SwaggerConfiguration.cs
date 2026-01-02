@@ -39,7 +39,7 @@ public static class SwaggerConfiguration
                 In = ParameterLocation.Header,
                 Type = SecuritySchemeType.Http,
                 Scheme = "bearer",
-                BearerFormat = "JWT"
+                BearerFormat = "JWT"  
             });
 
             options.AddSecurityRequirement(doc => new Microsoft.OpenApi.OpenApiSecurityRequirement

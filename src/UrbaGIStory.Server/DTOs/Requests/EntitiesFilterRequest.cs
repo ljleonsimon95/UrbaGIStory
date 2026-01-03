@@ -13,9 +13,24 @@ public class EntitiesFilterRequest
     public EntityType? EntityType { get; set; }
 
     /// <summary>
-    /// Filter by QGIS geometry ID (optional).
+    /// Filter by point geometry ID (optional).
     /// </summary>
-    public Guid? QGISGeometryId { get; set; }
+    public Guid? GeoPointId { get; set; }
+
+    /// <summary>
+    /// Filter by line geometry ID (optional).
+    /// </summary>
+    public Guid? GeoLineId { get; set; }
+
+    /// <summary>
+    /// Filter by polygon geometry ID (optional).
+    /// </summary>
+    public Guid? GeoPolygonId { get; set; }
+
+    /// <summary>
+    /// Filter entities that have any geometry linked (true), no geometry (false), or all (null).
+    /// </summary>
+    public bool? HasGeometry { get; set; }
 
     /// <summary>
     /// Search term for text search (optional).

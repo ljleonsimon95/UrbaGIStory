@@ -24,9 +24,34 @@ public class EntityConfiguration : IEntityTypeConfiguration<Entity>
             .HasConversion<int>()
             .HasComment("Type of entity (building, street, plaza, etc.).");
 
-        builder.Property(e => e.QGISGeometryId)
+        // Configure geometry foreign keys (only ONE can be set at a time)
+        builder.Property(e => e.GeoPointId)
             .IsRequired(false)
-            .HasComment("Optional link to QGIS geometry. Null if entity has no spatial representation.");
+            .HasComment("Optional link to a point geometry. Only ONE geometry FK can be set.");
+
+        builder.Property(e => e.GeoLineId)
+            .IsRequired(false)
+            .HasComment("Optional link to a line geometry. Only ONE geometry FK can be set.");
+
+        builder.Property(e => e.GeoPolygonId)
+            .IsRequired(false)
+            .HasComment("Optional link to a polygon geometry. Only ONE geometry FK can be set.");
+
+        // Configure relationships with ON DELETE SET NULL
+        builder.HasOne(e => e.GeoPoint)
+            .WithMany(g => g.Entities)
+            .HasForeignKey(e => e.GeoPointId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(e => e.GeoLine)
+            .WithMany(g => g.Entities)
+            .HasForeignKey(e => e.GeoLineId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        builder.HasOne(e => e.GeoPolygon)
+            .WithMany(g => g.Entities)
+            .HasForeignKey(e => e.GeoPolygonId)
+            .OnDelete(DeleteBehavior.SetNull);
 
         // Configure JSONB column for dynamic properties
         builder.Property(e => e.DynamicProperties)
@@ -75,8 +100,14 @@ public class EntityConfiguration : IEntityTypeConfiguration<Entity>
         builder.HasIndex(e => e.EntityType)
             .HasDatabaseName("IX_Entities_EntityType");
 
-        builder.HasIndex(e => e.QGISGeometryId)
-            .HasDatabaseName("IX_Entities_QGISGeometryId");
+        builder.HasIndex(e => e.GeoPointId)
+            .HasDatabaseName("IX_Entities_GeoPointId");
+
+        builder.HasIndex(e => e.GeoLineId)
+            .HasDatabaseName("IX_Entities_GeoLineId");
+
+        builder.HasIndex(e => e.GeoPolygonId)
+            .HasDatabaseName("IX_Entities_GeoPolygonId");
 
         builder.HasIndex(e => e.IsDeleted)
             .HasDatabaseName("IX_Entities_IsDeleted");
@@ -91,6 +122,16 @@ public class EntityConfiguration : IEntityTypeConfiguration<Entity>
 
         // Filter out deleted entities by default
         builder.HasQueryFilter(e => !e.IsDeleted);
+
+        // Check constraint: only ONE geometry FK can be set at a time
+        // This is enforced at the database level
+        builder.ToTable(t => t.HasCheckConstraint(
+            "CK_Entities_SingleGeometry",
+            @"(
+                (CASE WHEN ""GeoPointId"" IS NOT NULL THEN 1 ELSE 0 END) +
+                (CASE WHEN ""GeoLineId"" IS NOT NULL THEN 1 ELSE 0 END) +
+                (CASE WHEN ""GeoPolygonId"" IS NOT NULL THEN 1 ELSE 0 END)
+            ) <= 1"));
     }
 }
 

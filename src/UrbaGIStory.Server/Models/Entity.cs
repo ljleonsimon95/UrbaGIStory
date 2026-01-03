@@ -5,7 +5,7 @@ namespace UrbaGIStory.Server.Models;
 
 /// <summary>
 /// Represents an urban entity in the system.
-/// Entities can be linked to QGIS geometries and contain dynamic properties.
+/// Entities can be linked to geometries (point, line, or polygon) and contain dynamic properties.
 /// </summary>
 public class Entity : IHasConcurrency
 {
@@ -20,10 +20,37 @@ public class Entity : IHasConcurrency
     public EntityType EntityType { get; set; }
 
     /// <summary>
-    /// Optional link to QGIS geometry.
-    /// Null if entity has no spatial representation.
+    /// Optional link to a point geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
     /// </summary>
-    public Guid? QGISGeometryId { get; set; }
+    public Guid? GeoPointId { get; set; }
+
+    /// <summary>
+    /// Navigation property for the linked point geometry.
+    /// </summary>
+    public GeoPoint? GeoPoint { get; set; }
+
+    /// <summary>
+    /// Optional link to a line geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoLineId { get; set; }
+
+    /// <summary>
+    /// Navigation property for the linked line geometry.
+    /// </summary>
+    public GeoLine? GeoLine { get; set; }
+
+    /// <summary>
+    /// Optional link to a polygon geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoPolygonId { get; set; }
+
+    /// <summary>
+    /// Navigation property for the linked polygon geometry.
+    /// </summary>
+    public GeoPolygon? GeoPolygon { get; set; }
 
     /// <summary>
     /// Dynamic properties stored as JSONB.

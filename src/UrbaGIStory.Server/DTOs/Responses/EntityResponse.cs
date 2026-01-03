@@ -19,9 +19,24 @@ public class EntityResponse
     public EntityType EntityType { get; set; }
 
     /// <summary>
-    /// Optional link to QGIS geometry ID.
+    /// Optional link to a point geometry.
     /// </summary>
-    public Guid? QGISGeometryId { get; set; }
+    public Guid? GeoPointId { get; set; }
+
+    /// <summary>
+    /// Optional link to a line geometry.
+    /// </summary>
+    public Guid? GeoLineId { get; set; }
+
+    /// <summary>
+    /// Optional link to a polygon geometry.
+    /// </summary>
+    public Guid? GeoPolygonId { get; set; }
+
+    /// <summary>
+    /// Type of geometry linked to this entity (Point, Line, Polygon, or None).
+    /// </summary>
+    public string? GeometryType { get; set; }
 
     /// <summary>
     /// Dynamic properties stored as JSON.

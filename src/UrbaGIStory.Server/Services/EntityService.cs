@@ -38,7 +38,9 @@ public class EntityService
         {
             Id = Guid.NewGuid(),
             EntityType = request.EntityType,
-            QGISGeometryId = request.QGISGeometryId,
+            GeoPointId = request.GeoPointId,
+            GeoLineId = request.GeoLineId,
+            GeoPolygonId = request.GeoPolygonId,
             DynamicProperties = request.DynamicProperties,
             CreatedAt = DateTime.UtcNow,
             CreatedBy = createdBy,
@@ -52,8 +54,8 @@ public class EntityService
         await _dbContext.Entry(entity).ReloadAsync();
 
         _logger.LogInformation(
-            "Entity created: Id: {EntityId}, Type: {EntityType}, QGISGeometryId: {QGISGeometryId}, CreatedBy: {CreatedBy}",
-            entity.Id, entity.EntityType, entity.QGISGeometryId, createdBy);
+            "Entity created: Id: {EntityId}, Type: {EntityType}, GeometryType: {GeometryType}, CreatedBy: {CreatedBy}",
+            entity.Id, entity.EntityType, GetGeometryType(entity), createdBy);
 
         return MapToResponse(entity);
     }
@@ -83,7 +85,9 @@ public class EntityService
 
         // Update properties
         entity.EntityType = request.EntityType;
-        entity.QGISGeometryId = request.QGISGeometryId;
+        entity.GeoPointId = request.GeoPointId;
+        entity.GeoLineId = request.GeoLineId;
+        entity.GeoPolygonId = request.GeoPolygonId;
         entity.DynamicProperties = request.DynamicProperties;
         entity.UpdatedAt = DateTime.UtcNow;
         entity.UpdatedBy = updatedBy;
@@ -166,10 +170,33 @@ public class EntityService
             query = query.Where(e => e.EntityType == request.EntityType.Value);
         }
 
-        // Filter by QGIS geometry ID
-        if (request.QGISGeometryId.HasValue)
+        // Filter by geometry IDs
+        if (request.GeoPointId.HasValue)
         {
-            query = query.Where(e => e.QGISGeometryId == request.QGISGeometryId.Value);
+            query = query.Where(e => e.GeoPointId == request.GeoPointId.Value);
+        }
+
+        if (request.GeoLineId.HasValue)
+        {
+            query = query.Where(e => e.GeoLineId == request.GeoLineId.Value);
+        }
+
+        if (request.GeoPolygonId.HasValue)
+        {
+            query = query.Where(e => e.GeoPolygonId == request.GeoPolygonId.Value);
+        }
+
+        // Filter by whether entity has any geometry
+        if (request.HasGeometry.HasValue)
+        {
+            if (request.HasGeometry.Value)
+            {
+                query = query.Where(e => e.GeoPointId != null || e.GeoLineId != null || e.GeoPolygonId != null);
+            }
+            else
+            {
+                query = query.Where(e => e.GeoPointId == null && e.GeoLineId == null && e.GeoPolygonId == null);
+            }
         }
 
         // Text search (future: can search in dynamic properties)
@@ -230,7 +257,10 @@ public class EntityService
         {
             Id = entity.Id,
             EntityType = entity.EntityType,
-            QGISGeometryId = entity.QGISGeometryId,
+            GeoPointId = entity.GeoPointId,
+            GeoLineId = entity.GeoLineId,
+            GeoPolygonId = entity.GeoPolygonId,
+            GeometryType = GetGeometryType(entity),
             DynamicProperties = entity.DynamicProperties,
             RowVersion = entity.RowVersion,
             CreatedAt = entity.CreatedAt,
@@ -238,6 +268,17 @@ public class EntityService
             UpdatedAt = entity.UpdatedAt,
             UpdatedBy = entity.UpdatedBy
         };
+    }
+
+    /// <summary>
+    /// Gets the geometry type string for an entity.
+    /// </summary>
+    private static string? GetGeometryType(Entity entity)
+    {
+        if (entity.GeoPointId.HasValue) return "Point";
+        if (entity.GeoLineId.HasValue) return "Line";
+        if (entity.GeoPolygonId.HasValue) return "Polygon";
+        return null;
     }
 }
 

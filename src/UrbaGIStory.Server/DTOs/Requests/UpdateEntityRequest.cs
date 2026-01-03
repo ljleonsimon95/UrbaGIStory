@@ -16,10 +16,22 @@ public class UpdateEntityRequest
     public EntityType EntityType { get; set; }
 
     /// <summary>
-    /// Optional link to QGIS geometry ID.
-    /// If null, entity has no spatial representation.
+    /// Optional link to a point geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
     /// </summary>
-    public Guid? QGISGeometryId { get; set; }
+    public Guid? GeoPointId { get; set; }
+
+    /// <summary>
+    /// Optional link to a line geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoLineId { get; set; }
+
+    /// <summary>
+    /// Optional link to a polygon geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoPolygonId { get; set; }
 
     /// <summary>
     /// Optional dynamic properties as JSON.

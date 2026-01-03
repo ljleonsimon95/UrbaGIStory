@@ -1,0 +1,389 @@
+{
+  "info": {
+    "_postman_id": "geo-collection-001",
+    "name": "UrbaGIStory API - Geometries",
+    "description": "Endpoints for geometry management (points, lines, polygons).\n\nNote: Geometry creation and coordinate editing is done via QGIS only.\nThis collection handles metadata updates (name, description) and deletions.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Points",
+      "item": [
+        {
+          "name": "Get All Points",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/points?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "points"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasLinkedEntities",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get a paginated list of point geometries with optional filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Point by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/points/{{geoPointId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "points", "{{geoPointId}}"]
+            },
+            "description": "Get a specific point geometry by ID. Response includes coordinates and linked entities count."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Point Metadata",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Point Name\",\n  \"description\": \"Updated description for this point\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/points/{{geoPointId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "points", "{{geoPointId}}"]
+            },
+            "description": "Update a point's metadata (name, description only). Geometry coordinates can only be modified via QGIS."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Point",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/points/{{geoPointId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "points", "{{geoPointId}}"]
+            },
+            "description": "Delete a point geometry (soft delete). Linked entities will have their GeoPointId set to NULL automatically."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for point geometries management."
+    },
+    {
+      "name": "Lines",
+      "item": [
+        {
+          "name": "Get All Lines",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/lines?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "lines"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasLinkedEntities",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get a paginated list of line geometries with optional filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Line by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/lines/{{geoLineId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "lines", "{{geoLineId}}"]
+            },
+            "description": "Get a specific line geometry by ID. Response includes coordinates, length, and linked entities count."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Line Metadata",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Line Name\",\n  \"description\": \"Updated description for this line\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/lines/{{geoLineId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "lines", "{{geoLineId}}"]
+            },
+            "description": "Update a line's metadata (name, description only). Geometry coordinates can only be modified via QGIS."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Line",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/lines/{{geoLineId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "lines", "{{geoLineId}}"]
+            },
+            "description": "Delete a line geometry (soft delete). Linked entities will have their GeoLineId set to NULL automatically."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for line geometries management."
+    },
+    {
+      "name": "Polygons",
+      "item": [
+        {
+          "name": "Get All Polygons",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/polygons?page=1&pageSize=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "polygons"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "pageSize",
+                  "value": "20"
+                },
+                {
+                  "key": "searchTerm",
+                  "value": "",
+                  "disabled": true
+                },
+                {
+                  "key": "hasLinkedEntities",
+                  "value": "true",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get a paginated list of polygon geometries with optional filtering."
+          },
+          "response": []
+        },
+        {
+          "name": "Get Polygon by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/polygons/{{geoPolygonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "polygons", "{{geoPolygonId}}"]
+            },
+            "description": "Get a specific polygon geometry by ID. Response includes coordinates, area, perimeter, and linked entities count."
+          },
+          "response": []
+        },
+        {
+          "name": "Update Polygon Metadata",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Updated Polygon Name\",\n  \"description\": \"Updated description for this polygon\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/polygons/{{geoPolygonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "polygons", "{{geoPolygonId}}"]
+            },
+            "description": "Update a polygon's metadata (name, description only). Geometry coordinates can only be modified via QGIS."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Polygon",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{accessToken}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/geometries/polygons/{{geoPolygonId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "geometries", "polygons", "{{geoPolygonId}}"]
+            },
+            "description": "Delete a polygon geometry (soft delete). Linked entities will have their GeoPolygonId set to NULL automatically."
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints for polygon geometries management."
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [""]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "geoPointId",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "geoLineId",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    },
+    {
+      "key": "geoPolygonId",
+      "value": "00000000-0000-0000-0000-000000000000",
+      "type": "string"
+    }
+  ]
+}
+

@@ -15,6 +15,7 @@ public static class ServiceConfiguration
         services.AddScoped<BackupService>();
         services.AddScoped<LogsService>();
         services.AddScoped<PermissionService>();
+        services.AddScoped<EntityService>();
         services.AddSingleton<PerformanceMetricsService>();
 
         return services;

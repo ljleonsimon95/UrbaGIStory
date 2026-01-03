@@ -81,8 +81,8 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Entity Management
-  epic-5: backlog
-  5-1-implementar-creacion-de-entidades-basadas-en-geometrias-qgis: backlog
+  epic-5: in-progress
+  5-1-implementar-creacion-de-entidades-basadas-en-geometrias-qgis: done
   5-2-implementar-asignacion-de-tipo-de-entidad: backlog
   5-3-implementar-visualizacion-de-informacion-de-entidades: backlog
   5-4-implementar-agregar-informacion-a-entidades-con-propiedades-dinamicas: backlog

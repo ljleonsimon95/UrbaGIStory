@@ -18,6 +18,11 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     /// </summary>
     public DbSet<Permission> Permissions { get; set; } = null!;
 
+    /// <summary>
+    /// Urban entities in the system.
+    /// </summary>
+    public DbSet<Entity> Entities { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

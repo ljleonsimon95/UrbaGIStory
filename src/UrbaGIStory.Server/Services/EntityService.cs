@@ -34,6 +34,22 @@ public class EntityService
         CreateEntityRequest request,
         Guid createdBy)
     {
+        // Validate that only ONE geometry FK is set
+        var geometryCount = (request.GeoPointId.HasValue ? 1 : 0) +
+                           (request.GeoLineId.HasValue ? 1 : 0) +
+                           (request.GeoPolygonId.HasValue ? 1 : 0);
+
+        if (geometryCount > 1)
+        {
+            throw new ValidationException("Only one geometry can be linked to an entity. Please specify either GeoPointId, GeoLineId, or GeoPolygonId, but not multiple.");
+        }
+
+        // Validate EntityType is a valid enum value
+        if (!Enum.IsDefined(typeof(EntityType), request.EntityType))
+        {
+            throw new ValidationException($"Invalid EntityType: {request.EntityType}");
+        }
+
         var entity = new Entity
         {
             Id = Guid.NewGuid(),
@@ -81,6 +97,22 @@ public class EntityService
                 "Concurrency conflict detected for entity {EntityId}. Expected RowVersion: {Expected}, Actual: {Actual}",
                 entityId, Convert.ToBase64String(request.RowVersion), Convert.ToBase64String(entity.RowVersion));
             throw new ConcurrencyConflictException("Entity", entityId);
+        }
+
+        // Validate that only ONE geometry FK is set
+        var geometryCount = (request.GeoPointId.HasValue ? 1 : 0) +
+                           (request.GeoLineId.HasValue ? 1 : 0) +
+                           (request.GeoPolygonId.HasValue ? 1 : 0);
+
+        if (geometryCount > 1)
+        {
+            throw new ValidationException("Only one geometry can be linked to an entity. Please specify either GeoPointId, GeoLineId, or GeoPolygonId, but not multiple.");
+        }
+
+        // Validate EntityType is a valid enum value
+        if (!Enum.IsDefined(typeof(EntityType), request.EntityType))
+        {
+            throw new ValidationException($"Invalid EntityType: {request.EntityType}");
         }
 
         // Update properties
@@ -143,7 +175,12 @@ public class EntityService
     /// </summary>
     public async Task<EntityResponse> GetEntityAsync(Guid entityId)
     {
-        var entity = await _dbContext.Entities.FindAsync(entityId);
+        var entity = await _dbContext.Entities
+            .Include(e => e.GeoPoint)
+            .Include(e => e.GeoLine)
+            .Include(e => e.GeoPolygon)
+            .FirstOrDefaultAsync(e => e.Id == entityId);
+
         if (entity == null)
         {
             throw new EntityNotFoundException("Entity", entityId);
@@ -211,8 +248,11 @@ public class EntityService
         // Get total count
         var totalCount = await query.CountAsync();
 
-        // Apply pagination
+        // Apply pagination and include geometries
         var entities = await query
+            .Include(e => e.GeoPoint)
+            .Include(e => e.GeoLine)
+            .Include(e => e.GeoPolygon)
             .OrderByDescending(e => e.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
@@ -253,7 +293,7 @@ public class EntityService
     /// </summary>
     private static EntityResponse MapToResponse(Entity entity)
     {
-        return new EntityResponse
+        var response = new EntityResponse
         {
             Id = entity.Id,
             EntityType = entity.EntityType,
@@ -268,6 +308,25 @@ public class EntityService
             UpdatedAt = entity.UpdatedAt,
             UpdatedBy = entity.UpdatedBy
         };
+
+        // Include geometry metadata if available
+        if (entity.GeoPoint != null)
+        {
+            response.GeometryName = entity.GeoPoint.Name;
+            response.GeometryDescription = entity.GeoPoint.Description;
+        }
+        else if (entity.GeoLine != null)
+        {
+            response.GeometryName = entity.GeoLine.Name;
+            response.GeometryDescription = entity.GeoLine.Description;
+        }
+        else if (entity.GeoPolygon != null)
+        {
+            response.GeometryName = entity.GeoPolygon.Name;
+            response.GeometryDescription = entity.GeoPolygon.Description;
+        }
+
+        return response;
     }
 
     /// <summary>

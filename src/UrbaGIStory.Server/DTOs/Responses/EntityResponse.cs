@@ -39,6 +39,16 @@ public class EntityResponse
     public string? GeometryType { get; set; }
 
     /// <summary>
+    /// Name of the linked geometry (if any).
+    /// </summary>
+    public string? GeometryName { get; set; }
+
+    /// <summary>
+    /// Description of the linked geometry (if any).
+    /// </summary>
+    public string? GeometryDescription { get; set; }
+
+    /// <summary>
     /// Dynamic properties stored as JSON.
     /// </summary>
     public JsonDocument? DynamicProperties { get; set; }

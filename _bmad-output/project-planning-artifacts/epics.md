@@ -8,7 +8,7 @@ functionalRequirementsCount: 77
 nonFunctionalRequirementsCount: 18
 additionalRequirementsCount: 20
 epicsCount: 9
-storiesCount: 58
+storiesCount: 67
 validationStatus: 'approved'
 workflowStatus: 'complete'
 readyForDevelopment: true
@@ -727,6 +727,126 @@ So that collaboration is fluid without conflicts.
 **And** All operations complete successfully
 **And** System supports up to 10 concurrent users (NFR5)
 
+#### Story 2.8: Implementar UI de autenticación (Login/Register)
+
+As a user,
+I want to see a login page with a clean interface,
+So that I can authenticate and access the application.
+
+**FRs covered:** FR38
+
+**Acceptance Criteria:**
+
+**Given** I access the application
+**When** I am not authenticated
+**Then** I see a login page
+**And** The login page has username and password fields
+**And** The login page has a submit button
+**And** The page is responsive and visually clear
+
+**Given** I provide invalid credentials
+**When** I submit the login form
+**Then** I see an error message indicating invalid credentials
+**And** The error message is clear and helpful
+**And** I can retry login without page reload
+
+**Given** I successfully log in
+**When** Authentication succeeds
+**Then** I am redirected to the main application
+**And** My authentication token is stored securely
+**And** The navigation shows I am logged in
+
+**Given** My session expires
+**When** I try to access protected content
+**Then** I am redirected to the login page
+**And** I see a message indicating session expired
+**And** I can log in again
+
+#### Story 2.9: Implementar UI de gestión de usuarios
+
+As a technical administrator,
+I want to see a user management interface,
+So that I can create, view, edit, and manage users visually.
+
+**FRs covered:** FR36, FR37, FR38
+
+**Acceptance Criteria:**
+
+**Given** I am a technical administrator
+**When** I access the user management page
+**Then** I see a list of all users in a table
+**And** Each user shows username, email, role, and status (active/inactive)
+**And** I can filter users by role or status
+**And** I can search users by username or email
+**And** The list is paginated for performance
+
+**Given** I want to create a new user
+**When** I click the "Create User" button
+**Then** A form dialog opens
+**And** I can enter username, email, and password
+**And** Form validation shows errors before submission
+**And** Upon successful creation, the user appears in the list
+
+**Given** I want to edit a user
+**When** I click on a user in the list
+**Then** An edit form opens
+**And** I can modify username, email, or password
+**And** Password changes require confirmation
+**And** Changes are validated before saving
+**And** Upon successful update, changes are reflected in the list
+
+**Given** I want to manage user roles
+**When** I view a user
+**Then** I can see current roles assigned
+**And** I can add roles using a dropdown
+**And** I can remove roles with a delete action
+**And** Role changes are immediately visible
+
+**Given** I want to deactivate a user
+**When** I click deactivate on a user
+**Then** A confirmation dialog appears
+**And** Upon confirmation, the user is marked as inactive
+**And** The user status is updated in the list
+**And** I can reactivate the user later
+
+#### Story 2.10: Implementar UI de gestión de permisos
+
+As an office manager,
+I want to see a permissions management interface,
+So that I can configure permissions for users and entities visually.
+
+**FRs covered:** FR39, FR40
+
+**Acceptance Criteria:**
+
+**Given** I am an office manager
+**When** I access the permissions management page
+**Then** I see a list of all permissions
+**And** Each permission shows user, entity, and read/write access
+**And** I can filter permissions by user or entity
+**And** I can search permissions
+**And** The list is paginated
+
+**Given** I want to create a permission
+**When** I click "Create Permission"
+**Then** A form opens
+**And** I can select a user from a dropdown
+**And** I can select an entity from a dropdown
+**And** I can set read and/or write permissions
+**And** Upon creation, the permission appears in the list
+
+**Given** I want to edit a permission
+**When** I click on a permission
+**Then** An edit form opens
+**And** I can modify read/write permissions
+**And** Changes are saved and reflected immediately
+
+**Given** I want to view permissions for an entity
+**When** I filter by entity
+**Then** I see all users who have permissions for that entity
+**And** I can see their read/write access levels
+**And** I can modify permissions directly from this view
+
 ### Epic 3: Geographic Visualization
 
 Users can visualize and navigate through an interactive map of their work zone. This epic enables the core map functionality that is central to the application.
@@ -862,6 +982,60 @@ So that I can view their information.
 **Then** A selection list is shown
 **And** I can choose which entity to select
 **And** Selected entity is highlighted on the map
+
+#### Story 3.5: Implementar UI de gestión de entidades
+
+As a user,
+I want to see an entity management interface,
+So that I can create, view, edit, and manage entities visually.
+
+**FRs covered:** FR6, FR7, FR8, FR61, FR62
+
+**Acceptance Criteria:**
+
+**Given** I am logged in
+**When** I access the entity management page
+**Then** I see a list of entities in a table (MudBlazor DataGrid)
+**And** Each entity shows type, geometry type, and creation date
+**And** I can filter entities by type or geometry presence
+**And** I can search entities
+**And** The list is paginated
+**And** I can sort by any column
+
+**Given** I want to create a new entity
+**When** I click "Create Entity"
+**Then** A form dialog opens (MudBlazor Dialog)
+**And** I can select entity type from dropdown
+**And** I can optionally select a geometry (point, line, or polygon) from dropdowns
+**And** I can enter dynamic properties (JSON editor with validation)
+**And** Form validation ensures only one geometry is selected
+**And** Upon creation, the entity appears in the list and on the map
+**And** A success notification is shown
+
+**Given** I want to view entity details
+**When** I click on an entity in the list or map
+**Then** An entity detail panel opens
+**And** I can see all entity information
+**And** I can see linked geometry information (name, description)
+**And** I can see dynamic properties displayed clearly
+**And** I can see audit information (created by, updated by, timestamps)
+
+**Given** I want to edit an entity
+**When** I click edit on an entity
+**Then** An edit form opens
+**And** I can modify entity type
+**And** I can change geometry links
+**And** I can update dynamic properties
+**And** RowVersion is included for concurrency control
+**And** If there's a concurrency conflict, I see a clear error message
+**And** I can refresh and retry
+
+**Given** I want to delete an entity
+**When** I click delete on an entity
+**Then** A confirmation dialog appears
+**And** Upon confirmation, the entity is soft-deleted
+**And** The entity disappears from normal views
+**And** I can reactivate it later if needed
 
 ### Epic 4: QGIS Integration
 
@@ -1597,6 +1771,56 @@ So that I can update which templates are available without losing category defin
 **And** Category can be reactivated
 **And** Data integrity is maintained
 
+#### Story 6.8: Implementar UI de gestión de categorías
+
+As an office manager,
+I want to see a category management interface,
+So that I can create, edit, and assign categories visually.
+
+**FRs covered:** FR21, FR22, FR23, FR70
+
+**Acceptance Criteria:**
+
+**Given** I am an office manager
+**When** I access the category management page
+**Then** I see a list of all categories in a table
+**And** Each category shows name, description, and assigned entity types
+**And** I can filter categories
+**And** I can search categories
+**And** The list is paginated
+
+**Given** I want to create a category
+**When** I click "Create Category"
+**Then** A form dialog opens (MudBlazor Dialog)
+**And** I can enter category name and description
+**And** I can add properties with types (text, number, date, etc.) using a dynamic form
+**And** I can mark properties as required or optional
+**And** Form validation ensures category name is unique
+**And** Upon creation, the category appears in the list
+**And** A success notification is shown
+
+**Given** I want to edit a category
+**When** I click on a category
+**Then** An edit form opens
+**And** I can modify name and description
+**And** I can add, edit, or remove properties
+**And** Changes are validated before saving
+**And** Upon update, changes are reflected immediately
+
+**Given** I want to assign categories to entity types
+**When** I access the category assignment interface
+**Then** I see a matrix view (entity types × categories)
+**And** I can check/uncheck assignments
+**And** Assignments are saved immediately
+**And** I can see which categories are assigned to each entity type
+**And** Visual indicators show active assignments
+
+**Given** I want to unassign a category
+**When** I uncheck a category assignment
+**Then** The category is soft-unassigned
+**And** The assignment is removed from the view
+**And** The category remains in the system
+
 ### Epic 7: Document Management
 
 Users can attach, manage, and search documents related to urban entities with temporal metadata. This epic enables comprehensive document handling.
@@ -1857,6 +2081,56 @@ So that I can find documents from specific time periods.
 **Then** Estimated dates are included in search results
 **And** Estimated dates are clearly marked in results
 **And** Search works correctly with estimated date ranges
+
+#### Story 7.9: Implementar UI de gestión de documentos
+
+As a user,
+I want to see a document management interface,
+So that I can attach, view, and manage documents for entities.
+
+**FRs covered:** FR15, FR16, FR17, FR18, FR19, FR63, FR64, FR65, FR66
+
+**Acceptance Criteria:**
+
+**Given** I am viewing an entity
+**When** I access the documents section
+**Then** I see a list of documents attached to the entity
+**And** Each document shows name, type, upload date, and author
+**And** I can see documents from multiple specialists
+**And** Documents are grouped by specialist or date
+**And** Documents are displayed in a table or card layout
+
+**Given** I want to attach a document
+**When** I click "Attach Document"
+**Then** A file upload dialog opens (MudBlazor FileUpload)
+**And** I can select a file from my computer
+**And** I can add metadata (datetime, type, description) in a form
+**And** Upload progress is shown
+**And** Upon successful upload, the document appears in the list
+**And** A success notification is shown
+
+**Given** I want to view a document
+**When** I click on a document
+**Then** A preview opens (if supported format: PDF, images)
+**Or** A download option is available
+**And** Document metadata is displayed
+**And** I can see which specialist uploaded it
+**And** I can see temporal metadata (datetime, fixed/estimated)
+
+**Given** I want to search documents
+**When** I use the search interface
+**Then** I can search by datetime (fixed or estimated) with date picker
+**And** I can filter by document type
+**And** I can filter by specialist
+**And** Search results update dynamically
+**And** Results are clearly displayed
+
+**Given** I want to delete a document
+**When** I click delete on a document
+**Then** A confirmation dialog appears
+**And** Upon confirmation, the document is removed
+**And** The document disappears from the list
+**And** A success notification is shown
 
 ### Epic 8: Filtering & Analysis
 
@@ -2241,3 +2515,85 @@ So that I can identify gaps and prioritize work.
 **Then** Only office managers can access (role-based access)
 **And** Unauthorized users receive 403 Forbidden
 **And** Dashboard is clearly organized and easy to understand
+
+#### Story 8.10: Implementar UI de filtrado y análisis
+
+As a user,
+I want to see a filtering and analysis interface,
+So that I can filter entities and generate reports visually.
+
+**FRs covered:** FR29, FR30, FR31, FR32, FR33, FR34, FR35, FR69, FR76
+
+**Acceptance Criteria:**
+
+**Given** I want to filter entities
+**When** I access the filter panel
+**Then** I see filter options organized by category
+**And** I can filter by entity type using checkboxes or dropdown
+**And** I can filter by categories using checkboxes
+**And** I can filter by properties within categories using dynamic forms
+**And** I can combine multiple filters
+**And** Filter criteria are clearly displayed
+**And** I can clear all filters with one button
+
+**Given** I apply filters
+**When** I click "Apply Filters"
+**Then** The map updates to show only matching entities
+**And** A results list shows matching entities
+**And** Results count is displayed
+**And** Filters can be cleared or modified
+**And** Results update dynamically
+**And** Loading indicator is shown during filter application
+
+**Given** I want to generate a report
+**When** I access the report generation interface
+**Then** I can select report type (map, table, graph) using tabs or buttons
+**And** I can select which variables to include using checkboxes
+**And** I can see authorship/traceability information
+**And** I can export the report (PDF, Excel, CSV)
+**And** I can save the report configuration
+**And** Report preview is shown before export
+
+**Given** I want to correlate variables
+**When** I use the correlation interface
+**Then** I can select variables from different departments using dropdowns
+**And** I can see correlations visually (graphs using chart library)
+**And** Results are displayed clearly
+**And** I can export correlation data
+**And** Correlation matrix is interactive
+
+#### Story 9.3: Implementar UI de dashboard y analytics
+
+As an office manager,
+I want to see a dashboard interface,
+So that I can view summaries and statistics visually.
+
+**FRs covered:** FR67, FR68
+
+**Acceptance Criteria:**
+
+**Given** I am an office manager
+**When** I access the dashboard
+**Then** I see a summary of specialist activity
+**And** I see statistics of information completeness
+**And** Charts and graphs are displayed clearly (using chart library)
+**And** Data is up-to-date
+**And** I can filter dashboard data by date range
+**And** Dashboard is responsive and visually organized
+
+**Given** I want to see activity summary
+**When** I view the dashboard
+**Then** I see number of entities created per specialist (bar chart)
+**And** I see number of documents uploaded per specialist (bar chart)
+**And** I see recent activity timeline (line chart or timeline)
+**And** Activity is grouped by specialist or department
+**And** Charts are interactive (hover for details)
+
+**Given** I want to see completeness statistics
+**When** I view the dashboard
+**Then** I see percentage of entities with complete information (pie chart or gauge)
+**And** I see which entity types are most complete (bar chart)
+**And** I see which categories are most used (bar chart)
+**And** Statistics are calculated based on required properties
+**And** I can drill down to see details
+**And** I can export statistics as reports

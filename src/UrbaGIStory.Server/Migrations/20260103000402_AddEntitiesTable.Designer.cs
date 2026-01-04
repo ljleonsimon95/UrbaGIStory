@@ -3,8 +3,8 @@ using System;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using UrbaGIStory.Server.Data;
 
@@ -13,9 +13,11 @@ using UrbaGIStory.Server.Data;
 namespace UrbaGIStory.Server.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260103000402_AddEntitiesTable")]
+    partial class AddEntitiesTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -272,23 +274,15 @@ namespace UrbaGIStory.Server.Migrations
                         .HasColumnType("integer")
                         .HasComment("Type of entity (building, street, plaza, etc.).");
 
-                    b.Property<Guid?>("GeoLineId")
-                        .HasColumnType("uuid")
-                        .HasComment("Optional link to a line geometry. Only ONE geometry FK can be set.");
-
-                    b.Property<Guid?>("GeoPointId")
-                        .HasColumnType("uuid")
-                        .HasComment("Optional link to a point geometry. Only ONE geometry FK can be set.");
-
-                    b.Property<Guid?>("GeoPolygonId")
-                        .HasColumnType("uuid")
-                        .HasComment("Optional link to a polygon geometry. Only ONE geometry FK can be set.");
-
                     b.Property<bool>("IsDeleted")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("boolean")
                         .HasDefaultValue(false)
                         .HasComment("Whether the entity is deleted (soft delete).");
+
+                    b.Property<Guid?>("QGISGeometryId")
+                        .HasColumnType("uuid")
+                        .HasComment("Optional link to QGIS geometry. Null if entity has no spatial representation.");
 
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
@@ -318,184 +312,13 @@ namespace UrbaGIStory.Server.Migrations
                     b.HasIndex("EntityType")
                         .HasDatabaseName("IX_Entities_EntityType");
 
-                    b.HasIndex("GeoLineId")
-                        .HasDatabaseName("IX_Entities_GeoLineId");
-
-                    b.HasIndex("GeoPointId")
-                        .HasDatabaseName("IX_Entities_GeoPointId");
-
-                    b.HasIndex("GeoPolygonId")
-                        .HasDatabaseName("IX_Entities_GeoPolygonId");
-
                     b.HasIndex("IsDeleted")
                         .HasDatabaseName("IX_Entities_IsDeleted");
 
-                    b.ToTable("Entities", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_Entities_SingleGeometry", "(\r\n                (CASE WHEN \"GeoPointId\" IS NOT NULL THEN 1 ELSE 0 END) +\r\n                (CASE WHEN \"GeoLineId\" IS NOT NULL THEN 1 ELSE 0 END) +\r\n                (CASE WHEN \"GeoPolygonId\" IS NOT NULL THEN 1 ELSE 0 END)\r\n            ) <= 1");
-                        });
-                });
+                    b.HasIndex("QGISGeometryId")
+                        .HasDatabaseName("IX_Entities_QGISGeometryId");
 
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoLine", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()")
-                        .HasComment("Unique identifier for the line geometry.");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()")
-                        .HasComment("Date and time when the geometry was created (UTC).");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was deleted (null if not deleted).");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasComment("Optional description of the geometry.");
-
-                    b.Property<LineString>("Geometry")
-                        .HasColumnType("geometry(LineString, 4326)")
-                        .HasComment("LineString geometry in WGS84 (EPSG:4326).");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether the geometry is deleted (soft delete).");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasComment("Name of the geometry (visible in QGIS).");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was last updated (UTC).");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Geometry");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geometry"), "GIST");
-
-                    b.HasIndex("IsDeleted")
-                        .HasFilter("\"IsDeleted\" = false");
-
-                    b.ToTable("geo_lines", (string)null);
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoPoint", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()")
-                        .HasComment("Unique identifier for the point geometry.");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()")
-                        .HasComment("Date and time when the geometry was created (UTC).");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was deleted (null if not deleted).");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasComment("Optional description of the geometry.");
-
-                    b.Property<Point>("Geometry")
-                        .HasColumnType("geometry(Point, 4326)")
-                        .HasComment("Point geometry in WGS84 (EPSG:4326).");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether the geometry is deleted (soft delete).");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasComment("Name of the geometry (visible in QGIS).");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was last updated (UTC).");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Geometry");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geometry"), "GIST");
-
-                    b.HasIndex("IsDeleted")
-                        .HasFilter("\"IsDeleted\" = false");
-
-                    b.ToTable("geo_points", (string)null);
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoPolygon", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()")
-                        .HasComment("Unique identifier for the polygon geometry.");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("NOW()")
-                        .HasComment("Date and time when the geometry was created (UTC).");
-
-                    b.Property<DateTime?>("DeletedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was deleted (null if not deleted).");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("text")
-                        .HasComment("Optional description of the geometry.");
-
-                    b.Property<Polygon>("Geometry")
-                        .HasColumnType("geometry(Polygon, 4326)")
-                        .HasComment("Polygon geometry in WGS84 (EPSG:4326).");
-
-                    b.Property<bool>("IsDeleted")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("boolean")
-                        .HasDefaultValue(false)
-                        .HasComment("Whether the geometry is deleted (soft delete).");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)")
-                        .HasComment("Name of the geometry (visible in QGIS).");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("timestamp with time zone")
-                        .HasComment("Date and time when the geometry was last updated (UTC).");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("Geometry");
-
-                    NpgsqlIndexBuilderExtensions.HasMethod(b.HasIndex("Geometry"), "GIST");
-
-                    b.HasIndex("IsDeleted")
-                        .HasFilter("\"IsDeleted\" = false");
-
-                    b.ToTable("geo_polygons", (string)null);
+                    b.ToTable("Entities", (string)null);
                 });
 
             modelBuilder.Entity("UrbaGIStory.Server.Models.Permission", b =>
@@ -607,30 +430,6 @@ namespace UrbaGIStory.Server.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("UrbaGIStory.Server.Models.Entity", b =>
-                {
-                    b.HasOne("UrbaGIStory.Server.Models.GeoLine", "GeoLine")
-                        .WithMany("Entities")
-                        .HasForeignKey("GeoLineId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("UrbaGIStory.Server.Models.GeoPoint", "GeoPoint")
-                        .WithMany("Entities")
-                        .HasForeignKey("GeoPointId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.HasOne("UrbaGIStory.Server.Models.GeoPolygon", "GeoPolygon")
-                        .WithMany("Entities")
-                        .HasForeignKey("GeoPolygonId")
-                        .OnDelete(DeleteBehavior.SetNull);
-
-                    b.Navigation("GeoLine");
-
-                    b.Navigation("GeoPoint");
-
-                    b.Navigation("GeoPolygon");
-                });
-
             modelBuilder.Entity("UrbaGIStory.Server.Models.Permission", b =>
                 {
                     b.HasOne("UrbaGIStory.Server.Identity.ApplicationUser", "User")
@@ -640,21 +439,6 @@ namespace UrbaGIStory.Server.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoLine", b =>
-                {
-                    b.Navigation("Entities");
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoPoint", b =>
-                {
-                    b.Navigation("Entities");
-                });
-
-            modelBuilder.Entity("UrbaGIStory.Server.Models.GeoPolygon", b =>
-                {
-                    b.Navigation("Entities");
                 });
 #pragma warning restore 612, 618
         }

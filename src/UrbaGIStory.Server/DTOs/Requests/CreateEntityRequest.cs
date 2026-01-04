@@ -1,0 +1,42 @@
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
+using UrbaGIStory.Server.Models;
+
+namespace UrbaGIStory.Server.DTOs.Requests;
+
+/// <summary>
+/// Request DTO for creating a new entity.
+/// </summary>
+public class CreateEntityRequest
+{
+    /// <summary>
+    /// Type of entity (building, street, plaza, etc.).
+    /// </summary>
+    [Required(ErrorMessage = "EntityType is required")]
+    public EntityType EntityType { get; set; }
+
+    /// <summary>
+    /// Optional link to a point geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoPointId { get; set; }
+
+    /// <summary>
+    /// Optional link to a line geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoLineId { get; set; }
+
+    /// <summary>
+    /// Optional link to a polygon geometry.
+    /// Only ONE of GeoPointId, GeoLineId, or GeoPolygonId can be set.
+    /// </summary>
+    public Guid? GeoPolygonId { get; set; }
+
+    /// <summary>
+    /// Optional dynamic properties as JSON.
+    /// Properties are defined by categories assigned to the entity type.
+    /// </summary>
+    public JsonDocument? DynamicProperties { get; set; }
+}
+

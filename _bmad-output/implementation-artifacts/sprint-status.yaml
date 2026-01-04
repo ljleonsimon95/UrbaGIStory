@@ -53,7 +53,7 @@ development_status:
   epic-1-retrospective: optional
 
   # Epic 2: User Authentication & Authorization
-  epic-2: done
+  epic-2: in-progress
   2-1-implementar-registro-e-inicio-de-sesion-de-usuarios: done
   2-2-implementar-gestion-de-usuarios-por-administrador-tecnico: done
   2-3-implementar-asignacion-de-roles-a-usuarios: done
@@ -61,6 +61,9 @@ development_status:
   2-5-implementar-desactivacion-de-usuarios-soft-delete: done
   2-6-implementar-control-de-acceso-basado-en-roles-rbac: done
   2-7-implementar-soporte-para-acceso-concurrente-de-multiples-usuarios: done
+  2-8-implementar-ui-de-autenticacion-login-register: backlog
+  2-9-implementar-ui-de-gestion-de-usuarios: backlog
+  2-10-implementar-ui-de-gestion-de-permisos: backlog
   epic-2-retrospective: optional
 
   # Epic 3: Geographic Visualization
@@ -69,6 +72,7 @@ development_status:
   3-2-implementar-visualizacion-del-mapa-interactivo-con-zona-de-trabajo: backlog
   3-3-implementar-carga-y-visualizacion-de-geometrias-desde-api: backlog
   3-4-implementar-seleccion-de-entidades-en-el-mapa: backlog
+  3-5-implementar-ui-de-gestion-de-entidades: backlog
   epic-3-retrospective: optional
 
   # Epic 4: QGIS Integration
@@ -81,17 +85,17 @@ development_status:
   epic-4-retrospective: optional
 
   # Epic 5: Entity Management
-  epic-5: backlog
-  5-1-implementar-creacion-de-entidades-basadas-en-geometrias-qgis: backlog
-  5-2-implementar-asignacion-de-tipo-de-entidad: backlog
-  5-3-implementar-visualizacion-de-informacion-de-entidades: backlog
+  epic-5: in-progress
+  5-1-implementar-creacion-de-entidades-basadas-en-geometrias-qgis: done
+  5-2-implementar-asignacion-de-tipo-de-entidad: done
+  5-3-implementar-visualizacion-de-informacion-de-entidades: done
   5-4-implementar-agregar-informacion-a-entidades-con-propiedades-dinamicas: backlog
   5-5-implementar-consulta-de-informacion-de-entidades: backlog
-  5-6-implementar-soporte-para-entidades-sin-geometrias: backlog
-  5-7-implementar-soporte-para-multiples-entidades-por-geometria: backlog
-  5-8-implementar-edicion-de-informacion-de-entidades: backlog
-  5-9-implementar-eliminacion-de-informacion-de-entidades-soft-delete: backlog
-  5-10-implementar-integridad-de-datos-con-acceso-concurrente: backlog
+  5-6-implementar-soporte-para-entidades-sin-geometrias: done
+  5-7-implementar-soporte-para-multiples-entidades-por-geometria: done
+  5-8-implementar-edicion-de-informacion-de-entidades: done
+  5-9-implementar-eliminacion-de-informacion-de-entidades-soft-delete: done
+  5-10-implementar-integridad-de-datos-con-acceso-concurrente: done
   epic-5-retrospective: optional
 
   # Epic 6: Category & Template System
@@ -103,6 +107,7 @@ development_status:
   6-5-implementar-generacion-dinamica-de-propiedades-basadas-en-categorias: backlog
   6-6-implementar-uso-de-categorias-por-especialistas: backlog
   6-7-implementar-desasignacion-de-categorias-de-tipos-de-entidad-soft-delete: backlog
+  6-8-implementar-ui-de-gestion-de-categorias: backlog
   epic-6-retrospective: optional
 
   # Epic 7: Document Management
@@ -115,6 +120,7 @@ development_status:
   7-6-implementar-eliminacion-de-documentos-adjuntos: backlog
   7-7-implementar-vista-previa-de-documentos: backlog
   7-8-implementar-busqueda-de-documentos-por-datetime: backlog
+  7-9-implementar-ui-de-gestion-de-documentos: backlog
   epic-7-retrospective: optional
 
   # Epic 8: Filtering & Analysis
@@ -128,11 +134,13 @@ development_status:
   8-7-implementar-generacion-de-reportes-combinando-diferentes-perspectivas: backlog
   8-8-implementar-trazabilidad-y-autoria-en-reportes: backlog
   8-9-implementar-exportacion-y-guardado-de-reportes-generados: backlog
+  8-10-implementar-ui-de-filtrado-y-analisis: backlog
   epic-8-retrospective: optional
 
   # Epic 9: Reporting & Analytics Dashboard
   epic-9: backlog
   9-1-implementar-dashboard-de-resumen-de-actividad-de-especialistas: backlog
   9-2-implementar-estadisticas-de-completitud-de-informacion: backlog
+  9-3-implementar-ui-de-dashboard-y-analytics: backlog
   epic-9-retrospective: optional
 

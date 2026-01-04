@@ -18,6 +18,26 @@ public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, 
     /// </summary>
     public DbSet<Permission> Permissions { get; set; } = null!;
 
+    /// <summary>
+    /// Urban entities in the system.
+    /// </summary>
+    public DbSet<Entity> Entities { get; set; } = null!;
+
+     /// <summary>
+    /// Point geometries (QGIS layer for points).
+    /// </summary>
+    public DbSet<GeoPoint> GeoPoints { get; set; } = null!;
+
+    /// <summary>
+    /// Line geometries (QGIS layer for lines/streets).
+    /// </summary>
+    public DbSet<GeoLine> GeoLines { get; set; } = null!;
+
+    /// <summary>
+    /// Polygon geometries (QGIS layer for polygons/buildings/blocks).
+    /// </summary>
+    public DbSet<GeoPolygon> GeoPolygons { get; set; } = null!;
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

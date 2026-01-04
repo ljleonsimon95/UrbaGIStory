@@ -58,6 +58,29 @@ Este directorio contiene todas las colecciones de Postman para la API de UrbaGIS
   - `POST /api/Users/{id}/activate` - Reactivar usuario desactivado
 - **Características:** Requiere rol `TechnicalAdministrator`
 
+### 7. **UrbaGIStory-API-Geometries.postman_collection.json**
+- **Propósito:** Gestión de geometrías (puntos, líneas, polígonos)
+- **Endpoints:**
+  - **Points:**
+    - `GET /api/Geometries/points` - Listar puntos con filtros
+    - `GET /api/Geometries/points/{id}` - Obtener punto por ID
+    - `PATCH /api/Geometries/points/{id}` - Actualizar metadatos (nombre, descripción)
+    - `DELETE /api/Geometries/points/{id}` - Eliminar punto (soft delete)
+  - **Lines:**
+    - `GET /api/Geometries/lines` - Listar líneas con filtros
+    - `GET /api/Geometries/lines/{id}` - Obtener línea por ID
+    - `PATCH /api/Geometries/lines/{id}` - Actualizar metadatos (nombre, descripción)
+    - `DELETE /api/Geometries/lines/{id}` - Eliminar línea (soft delete)
+  - **Polygons:**
+    - `GET /api/Geometries/polygons` - Listar polígonos con filtros
+    - `GET /api/Geometries/polygons/{id}` - Obtener polígono por ID
+    - `PATCH /api/Geometries/polygons/{id}` - Actualizar metadatos (nombre, descripción)
+    - `DELETE /api/Geometries/polygons/{id}` - Eliminar polígono (soft delete)
+- **Características:** 
+  - Requiere autenticación
+  - **IMPORTANTE:** La creación y edición de coordenadas se hace solo desde QGIS
+  - La API solo permite editar nombre/descripción y eliminar
+
 ## Environment
 
 ### **UrbaGIStory-API.postman_environment.json**
@@ -83,6 +106,7 @@ Archivo de environment con las variables:
    - **Backup** para operaciones de backup/restore
    - **Logs-Monitoring** para ver logs y métricas
    - **Users** para gestión de usuarios
+   - **Geometries** para ver/editar metadatos/eliminar geometrías
 
 ### 3. Autenticación Automática
 
